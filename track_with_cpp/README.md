@@ -40,7 +40,7 @@ And build:
     mkdir build
     cmake ./CMakeLists.txt
     make
-    mv yolov8 ${root}/track_with_cpp
+    cp yolov8 ${root}/track_with_cpp
     cd ${root}/track_with_cpp
    
 # test
