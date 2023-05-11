@@ -53,6 +53,9 @@ const std::vector<std::vector<unsigned int>> COLORS = {
 	{ 80, 183, 189 }, { 128, 128, 0 }
 };
 
+const std::vector<std::string> DISPALYED_CLASS_NAMES = {
+	"car", "motorcycle" };
+
 int main(int argc, char** argv)
 {
 const std::string engine_file_path{ argv[1] };
@@ -130,7 +133,7 @@ yolov8->postprocess(objs);
 }
 
 auto end = std::chrono::system_clock::now();
-yolov8->draw_objects(image, res, objs, CLASS_NAMES, COLORS);
+yolov8->draw_objects(image, res, objs, CLASS_NAMES, COLORS, DISPALYED_CLASS_NAMES);
 auto tc = (double)
 std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() / 1000.;
 printf("cost %2.4lf ms\n", tc);
@@ -154,7 +157,7 @@ auto start = std::chrono::system_clock::now();
 yolov8->infer();
 auto end = std::chrono::system_clock::now();
 yolov8->postprocess(objs);
-yolov8->draw_objects(image, res, objs, CLASS_NAMES, COLORS);
+yolov8->draw_objects(image, res, objs, CLASS_NAMES, COLORS, DISPALYED_CLASS_NAMES);
 auto tc = (double)
 std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() / 1000.;
 printf("cost %2.4lf ms\n", tc);
