@@ -368,60 +368,57 @@ void YOLOv8::draw_objects(
 	res = image.clone();
 	for (auto& obj : objs)
 	{
-		const auto& label = CLASS_NAMES[obj.label];
-        if (label == "car" || label == "motorcycle") {
-			cv::Scalar color = cv::Scalar(
-				COLORS[obj.label][0],
-				COLORS[obj.label][1],
-				COLORS[obj.label][2]
-			);
-			cv::rectangle(
-				res,
-				obj.rect,
-				color,
-				2
-			);
+		cv::Scalar color = cv::Scalar(
+			COLORS[obj.label][0],
+			COLORS[obj.label][1],
+			COLORS[obj.label][2]
+		);
+		cv::rectangle(
+			res,
+			obj.rect,
+			color,
+			2
+		);
 
-			char text[256];
-			sprintf(
-				text,
-				"%s %.1f%%",
-				CLASS_NAMES[obj.label].c_str(),
-				obj.prob * 100
-			);
+		char text[256];
+		sprintf(
+			text,
+			"%s %.1f%%",
+			CLASS_NAMES[obj.label].c_str(),
+			obj.prob * 100
+		);
 
-			int baseLine = 0;
-			cv::Size label_size = cv::getTextSize(
-				text,
-				cv::FONT_HERSHEY_SIMPLEX,
-				0.4,
-				1,
-				&baseLine
-			);
+		int baseLine = 0;
+		cv::Size label_size = cv::getTextSize(
+			text,
+			cv::FONT_HERSHEY_SIMPLEX,
+			0.4,
+			1,
+			&baseLine
+		);
 
-			int x = (int)obj.rect.x;
-			int y = (int)obj.rect.y + 1;
+		int x = (int)obj.rect.x;
+		int y = (int)obj.rect.y + 1;
 
-			if (y > res.rows)
-				y = res.rows;
+		if (y > res.rows)
+			y = res.rows;
 
-			cv::rectangle(
-				res,
-				cv::Rect(x, y, label_size.width, label_size.height + baseLine),
-				{ 0, 0, 255 },
-				-1
-			);
+		cv::rectangle(
+			res,
+			cv::Rect(x, y, label_size.width, label_size.height + baseLine),
+			{ 0, 0, 255 },
+			-1
+		);
 
-			cv::putText(
-				res,
-				text,
-				cv::Point(x, y + label_size.height),
-				cv::FONT_HERSHEY_SIMPLEX,
-				0.4,
-				{ 255, 255, 255 },
-				1
-			);
-		}
+		cv::putText(
+			res,
+			text,
+			cv::Point(x, y + label_size.height),
+			cv::FONT_HERSHEY_SIMPLEX,
+			0.4,
+			{ 255, 255, 255 },
+			1
+		);
 	}
 }
 #endif //JETSON_DETECT_YOLOV8_HPP
