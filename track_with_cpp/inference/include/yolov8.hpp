@@ -29,7 +29,8 @@ public:
 		cv::Mat& res,
 		const std::vector<Object>& objs,
 		const std::vector<std::string>& CLASS_NAMES,
-		const std::vector<std::vector<unsigned int>>& COLORS
+		const std::vector<std::vector<unsigned int>>& COLORS,
+		const std::vector<std::string>& DISPLAYED_CLASS_NAMES
 	);
 	int num_bindings;
 	int num_inputs = 0;
