@@ -25,7 +25,7 @@ To export the engine without python:
 
     /usr/src/tensorrt/bin/trtexec \
     --onnx=${root}/yolo_model/"${base_name}.onnx" \
-    --saveEngine="${base_name}.engine"
+    --saveEngine=${root}/yolo_model/"${base_name}.engine"
 
 # Inference with c++
 
@@ -42,3 +42,7 @@ And build:
     make
     mv yolov8 ${root}/track_with_cpp
     cd ${root}/track_with_cpp
+   
+# test
+    ./yolov8 ${root}/yolo_model/"${base_name}.engine" ./data/sample_1080p_h265.mp4
+
