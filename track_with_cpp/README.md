@@ -10,7 +10,7 @@
     $ model_name=$(ls $root/yolo_model | head -n1)
     $ base_name=${model_name%%.*}
 
-cd track_with_cpp
+    cd track_with_cpp
 
     conda activate {env_name}
 
@@ -25,7 +25,7 @@ To export the engine without python:
 
     /usr/src/tensorrt/bin/trtexec \
     --onnx=${root}/yolo_model/"${base_name}.onnx" \
-    --saveEngine="${base_name}.engine
+    --saveEngine="${base_name}.engine"
 
 # Inference with c++
 
