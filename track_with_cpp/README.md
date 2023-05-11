@@ -3,7 +3,7 @@
 # clone the repo
     git clone https://github.com/MoussaGRICHE/Car_Moto_tracking_jetson_nano.git
 
-cd Car_Moto_tracking_jetson_nano.git
+    cd Car_Moto_tracking_jetson_nano
 
     $ export root=${PWD}
 
