@@ -122,7 +122,7 @@ int main(int argc, char** argv)
         }
         else
         {
-            cap.open(0);
+            cap.open(-1);
         }
 
         if (!cap.isOpened())
