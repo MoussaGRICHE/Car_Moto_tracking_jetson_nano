@@ -384,8 +384,8 @@ void YOLOv8::draw_objects(
             char text[256];
             sprintf( 
 				text, 
-				"%s %.1f%%", 
-				CLASS_NAMES[obj.label].c_str() 
+				"%s", 
+				CLASS_NAMES[obj.label].c_str()
 				);
             int baseLine = 0;
             cv::Size label_size = cv::getTextSize( 
