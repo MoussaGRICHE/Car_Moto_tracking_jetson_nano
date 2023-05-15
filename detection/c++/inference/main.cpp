@@ -81,6 +81,7 @@ int main(int argc, char** argv)
 	{
 		if (IsFile(path))
 		{
+			std::string suffix = path.substr(path.find_last_of('.') + 1);
 			if (
 				suffix == "mp4" ||
 				suffix == "avi" ||
