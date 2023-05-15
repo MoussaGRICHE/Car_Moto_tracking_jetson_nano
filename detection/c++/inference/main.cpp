@@ -116,7 +116,9 @@ int main(int argc, char** argv)
     }
 
     cv::VideoCapture cap;
-    cv::VideoWriter writer;
+    int frame_width = cap.get(CAP_PROP_FRAME_WIDTH);//Getting the frame height//
+	int frame_height = cap.get(CAP_PROP_FRAME_HEIGHT);//Getting the frame width//
+	VideoWriter video("video1.mp4",10,17,Size(frame_width, frame_height));
     if (isVideo)
     {
         cap.open(input_value);
