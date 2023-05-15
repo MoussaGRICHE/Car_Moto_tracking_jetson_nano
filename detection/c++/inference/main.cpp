@@ -78,6 +78,7 @@ int main(int argc, char** argv)
     auto yolov8 = new YOLOv8(engine_file_path);
     yolov8->make_pipe(true);
 	if (path == "video")
+	{
 		if (IsFile(path))
 		{
 			if (
@@ -97,6 +98,7 @@ int main(int argc, char** argv)
 				std::abort();
 			}
 		}
+	}
     
     else if (path == "camera")
     {
