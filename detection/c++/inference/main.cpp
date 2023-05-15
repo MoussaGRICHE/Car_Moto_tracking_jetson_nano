@@ -83,7 +83,7 @@ int main(int argc, char** argv)
 	{
 		if (IsFile(input_value))
 		{
-			std::string suffix = path.substr(path.find_last_of('.') + 1);
+			std::string suffix = input_value.substr(input_value.find_last_of('.') + 1);
 			if (
 				suffix == "mp4" ||
 				suffix == "avi" ||
@@ -113,7 +113,7 @@ int main(int argc, char** argv)
 	cv::VideoCapture cap;
 	if (isVideo)
 	{
-		cap.open(path);
+		cap.open(input_value);
 		if (!cap.isOpened())
 		{
 			printf("can not open %s\n", path.c_str());
