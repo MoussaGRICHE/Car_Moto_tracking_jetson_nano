@@ -64,139 +64,99 @@ std::string gstreamer_pipeline (int capture_width, int capture_height, int displ
 }
 
 
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv){
     const std::string engine_file_path{ argv[1] };
     const std::string input_type{ argv[2] };
     std::string input_value;
-    std::string output_type{ argv[3] };
-
     std::vector<std::string> imagePathList;
     bool isVideo{ false };
     bool isCamera{ false };
-
     auto yolov8 = new YOLOv8(engine_file_path);
     yolov8->make_pipe(true);
-
-    if (input_type == "video")
-    {
+    if (input_type == "video") {
         assert(argc == 5);
-        input_value = argv[4];
-        if (IsFile(input_value))
-        {
+        input_value = argv[3];
+        if (IsFile(input_value)) {
             std::string suffix = input_value.substr(input_value.find_last_of('.') + 1);
-            if (
-                suffix == "mp4" ||
-                suffix == "avi" ||
-                suffix == "m4v" ||
-                suffix == "mpeg" ||
-                suffix == "mov" ||
-                suffix == "mkv"
-                )
-            {
+            if ( suffix == "mp4" || suffix == "avi" || suffix == "m4v" || suffix == "mpeg" || suffix == "mov" || suffix == "mkv" ) {
                 isVideo = true;
-            }
-            else
-            {
+            } else {
                 printf("suffix %s is wrong !!!\n", suffix.c_str());
                 std::abort();
             }
         }
-    }
-
-    else if (input_type == "camera")
-    {
+    } else if (input_type == "camera") {
         assert(argc == 4);
         isCamera = true;
     }
-
     cv::VideoCapture cap;
     cv::VideoWriter writer;
-    if (isVideo)
-    {
+    if (isVideo) {
         cap.open(input_value);
-        if (!cap.isOpened())
-        {
+        if (!cap.isOpened()) {
             printf("can not open %s\n", input_value.c_str());
             return -1;
         }
-        if (output_type == "save")
-        {
-            int frame_width = cap.get(cv::CAP_PROP_FRAME_WIDTH);
-            int frame_height = cap.get(cv::CAP_PROP_FRAME_HEIGHT);
-            int fps = cap.get(cv::CAP_PROP_FPS);
-            writer.open("output.mp4", cv::VideoWriter::fourcc('m', 'p', '4', 'v'), fps, cv::Size(frame_width, frame_height));
-        }
-    }
-    else
-    {
+    } else {
         int capture_width = 1280;
         int capture_height = 720;
         int display_width = 1280;
         int display_height = 720;
         int framerate = 30;
         int flip_method = 2;
-
-        std::string pipeline = gstreamer_pipeline(capture_width,
-            capture_height,
-            display_width,
-            display_height,
-            framerate,
-            flip_method);
+        std::string pipeline = gstreamer_pipeline(capture_width, capture_height, display_width, display_height, framerate, flip_method);
         std::cout << "Using pipeline: \n\t" << pipeline << "\n";
-
         cap.open(pipeline, cv::CAP_GSTREAMER);
         if (!cap.isOpened()) {
             std::cout << "Failed to open camera." << std::endl;
             return (-1);
         }
     }
-
     cv::Mat res, image;
     cv::Size size = cv::Size{ 640, 640 };
     std::vector<Object> objs;
-
     cv::namedWindow("result", cv::WINDOW_AUTOSIZE);
-
     int frame_count = 0;
 
-    while (cap.read(image))
-    {
+    // Check if we need to save the output
+    bool saveOutput = false;
+    if (std::string(argv[4]) == "save") {
+        saveOutput = true;
+        writer.open("output.mp4", cv::VideoWriter::fourcc('m', 'p', '4', 'v'), cap.get(cv::CAP_PROP_FPS), cv::Size(cap.get(cv::CAP_PROP_FRAME_WIDTH), cap.get(cv::CAP_PROP_FRAME_HEIGHT)));
+    }
+
+    while (cap.read(image)) {
         objs.clear();
         yolov8->copy_from_Mat(image, size);
         auto start = std::chrono::system_clock::now();
-
-        if (frame_count % 2 == 0)
-        {
+        if (frame_count % 2 == 0) {
             yolov8->infer();
             yolov8->postprocess(objs);
         }
-
         auto end = std::chrono::system_clock::now();
         yolov8->draw_objects(image, res, objs, CLASS_NAMES, COLORS, DISPALYED_CLASS_NAMES);
-        
-        if (output_type == "save")
+
+        // Save or show the output
+        if (saveOutput) {
             writer.write(res);
-
-        auto tc = (double)
-            std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() / 1000.;
-        
-        printf("cost %2.4lf ms\n", tc);
-
-        if (output_type == "show")
-        {
+        } else {
+            auto tc = (double) std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() / 1000.;
+            printf("cost %2.4lf ms\n", tc);
             cv::imshow("result", res);
-            if (cv::waitKey(10) == 'q')
+            if (cv::waitKey(10) == 'q') {
                 break;
+            }
         }
 
         frame_count++;
     }
 
+    // Release resources
+    writer.release();
     cv::destroyAllWindows();
-    
     delete yolov8;
 
     return 0;
 }
+
 
