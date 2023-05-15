@@ -69,7 +69,7 @@ int main(int argc, char** argv)
     const std::string engine_file_path{ argv[1] };
     const std::string input_type{ argv[2] };
     std::string input_value;
-	int::string infer_rate{ argv[4] };
+	int infer_rate{ argv[4] };
     std::string output_type{ argv[5] };
 
     std::vector<std::string> imagePathList;
