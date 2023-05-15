@@ -125,10 +125,11 @@ int main(int argc, char** argv)
             printf("can not open %s\n", input_value.c_str());
             return -1;
         }
-        double fps = cap.get(cv::CAP_PROP_FPS);
-        cv::Size size = cv::Size((int)cap.get(cv::CAP_PROP_FRAME_WIDTH), (int)cap.get(cv::CAP_PROP_FRAME_HEIGHT));
+        
         if (output_type == "save") {
-            writer.open("output.mp4", cv::VideoWriter::fourcc('m', 'p', '4', 'v'), 30, size);
+            int frame_width = cap.get(CAP_PROP_FRAME_WIDTH);//Getting the frame height//
+			int frame_height = cap.get(CAP_PROP_FRAME_HEIGHT);//Getting the frame width//
+			VideoWriter video("video1.mp4",10,17,Size(frame_width, frame_height));
         }
     }
     else
@@ -154,10 +155,12 @@ int main(int argc, char** argv)
             return (-1);
         }
 
-		if (output_type == "save") {
-           cv::Size size = cv::Size((int)cap.get(cv::CAP_PROP_FRAME_WIDTH), (int)cap.get(cv::CAP_PROP_FRAME_HEIGHT));
-           writer.open("output.mp4", cv::VideoWriter::fourcc('m', 'p', '4', 'v'), 30, size);
-       }
+		
+        if (output_type == "save") {
+            int frame_width = cap.get(CAP_PROP_FRAME_WIDTH);//Getting the frame height//
+			int frame_height = cap.get(CAP_PROP_FRAME_HEIGHT);//Getting the frame width//
+			VideoWriter video("video1.mp4",10,17,Size(frame_width, frame_height));
+        }
     }
 
 	cv::Mat res, image;
@@ -184,7 +187,7 @@ int main(int argc, char** argv)
 	yolov8->draw_objects(image, res, objs, CLASS_NAMES, COLORS, DISPALYED_CLASS_NAMES);
 
 	if (output_type == "save") {
-	writer.write(res);
+		video.write(res);
 	}
 
 	auto tc = (double)
