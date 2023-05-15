@@ -69,8 +69,8 @@ int main(int argc, char** argv)
  const std::string engine_file_path{ argv[1] };
  const std::string input_type{ argv[2] };
  std::string input_value;
- int infer_rate 
- std::string output_type{ argv[5] };
+ int infer_rate;
+ std::string output_type;
 
  std::vector<std::string> imagePathList;
  bool isVideo{ false };
@@ -83,7 +83,8 @@ int main(int argc, char** argv)
  {
  assert(argc == 6);
  input_value = argv[3];
- int infer_rate = std::stoi(argv[4]);
+ infer_rate = std::stoi(argv[4]);
+ output_type = argv[5];
  if (IsFile(input_value))
  {
  std::string suffix = input_value.substr(input_value.find_last_of('.') + 1);
@@ -109,7 +110,8 @@ int main(int argc, char** argv)
  else if (input_type == "camera")
  {
  assert(argc == 5);
- int infer_rate = std::stoi(argv[3]);
+ infer_rate = std::stoi(argv[3]);
+ output_type = argv[4];
  isCamera = true;
  }
 
@@ -197,10 +199,11 @@ int main(int argc, char** argv)
  frame_count++;
  }
 
- cv::destroyAllWindows();
+ cv:destroyAllWindows();
  delete yolov8;
  return 0;
 }
+
 
 
 
