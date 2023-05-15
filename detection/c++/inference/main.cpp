@@ -83,170 +83,167 @@ int main(int argc, char** argv)
     yolov8->make_pipe(true);
 
     if (input_type == "video")
-    {
-        assert(argc == 6);
-        input_value = argv[3];
-        infer_rate = std::stoi(argv[4]);
-        output_type = argv[5];
-        if (IsFile(input_value))
-        {
-            std::string suffix = input_value.substr(input_value.find_last_of('.') + 1);
-            if (
-                suffix == "mp4" ||
-                suffix == "avi" ||
-                suffix == "m4v" ||
-                suffix == "mpeg" ||
-                suffix == "mov" ||
-                suffix == "mkv"
-                )
-            {
-                isVideo = true;
-            }
-            else
-            {
-                printf("suffix %s is wrong !!!\n", suffix.c_str());
-                std::abort();
-            }
-        }
-    }
+		{
+			assert(argc == 6);
+			input_value = argv[3];
+			infer_rate = std::stoi(argv[4]);
+			output_type = argv[5];
+			if (IsFile(input_value))
+				{
+					std::string suffix = input_value.substr(input_value.find_last_of('.') + 1);
+					if (suffix == "mp4" || suffix == "avi" || suffix == "m4v" || suffix == "mpeg" || suffix == "mov" || suffix == "mkv")
+						{
+							isVideo = true;
+						}
+					else
+						{
+							printf("suffix %s is wrong !!!\n", suffix.c_str());
+							std::abort();
+						}
+				}
+		}
 
     else if (input_type == "camera")
-    {
-        assert(argc == 5);
-        infer_rate = std::stoi(argv[3]);
-        output_type = argv[4];
-        isCamera = true;
-    }
+		{
+			assert(argc == 5);
+			infer_rate = std::stoi(argv[3]);
+			output_type = argv[4];
+			isCamera = true;
+		}
 
     cv::VideoCapture cap;
     cv::VideoWriter writer;
     if (isVideo)
-    {
-        cap.open(input_value);
-        if (!cap.isOpened())
-        {
-            printf("can not open %s\n", input_value.c_str());
-            return -1;
-        }
-        
-        cv::Size size = cv::Size((int)cap.get(cv::CAP_PROP_FRAME_WIDTH), (int)cap.get(cv::CAP_PROP_FRAME_HEIGHT));
-        if (output_type == "save") {
-			 // Get current time
-			auto t = std::time(nullptr);
-			auto tm = *std::localtime(&t);
+		{
+			cap.open(input_value);
+			if (!cap.isOpened())
+				{
+					printf("can not open %s\n", input_value.c_str());
+					return -1;
+				}
+			
+			cv::Size size = cv::Size((int)cap.get(cv::CAP_PROP_FRAME_WIDTH), (int)cap.get(cv::CAP_PROP_FRAME_HEIGHT));
+			if (output_type == "save") 
+				{
+					// Get current time
+					auto t = std::time(nullptr);
+					auto tm = *std::localtime(&t);
 
-			// Format date and time
-			std::ostringstream oss;
-			oss << std::put_time(&tm, "%Y-%m-%d_%H-%M-%S");
-			auto str = oss.str();
+					// Format date and time
+					std::ostringstream oss;
+					oss << std::put_time(&tm, "%Y-%m-%d_%H-%M-%S");
+					auto str = oss.str();
 
-			// Get filename without extension
-			size_t lastindex = input_value.find_last_of("."); 
-			size_t lastSlash = input_value.find_last_of('/');
-    		size_t lastDot = input_value.find_last_of('.');
-    		std::string rawname = input_value.substr(lastSlash + 1, lastDot - lastSlash - 1);
+					// Get filename without extension
+					size_t lastindex = input_value.find_last_of("."); 
+					size_t lastSlash = input_value.find_last_of('/');
+					size_t lastDot = input_value.find_last_of('.');
+					std::string rawname = input_value.substr(lastSlash + 1, lastDot - lastSlash - 1);
 
-			// Construct new filename
-			std::string new_filename = rawname + "_detection_" + str + ".mp4";
+					// Construct new filename
+					std::string new_filename = rawname + "_detection_" + str + ".mp4";
 
-			writer.open(new_filename, cv::VideoWriter::fourcc('m', 'p', '4', 'v'), 30, size);
-           
-        }
-    }
+					writer.open(new_filename, cv::VideoWriter::fourcc('m', 'p', '4', 'v'), 30, size);  
+				}
+		}
     else
-    {
-        int capture_width = 1280;
-        int capture_height = 720;
-        int display_width = 1280;
-        int display_height = 720;
-        int framerate = 30;
-        int flip_method = 2;
+		{
+			int capture_width = 1280;
+			int capture_height = 720;
+			int display_width = 1280;
+			int display_height = 720;
+			int framerate = 30;
+			int flip_method = 2;
 
-        std::string pipeline = gstreamer_pipeline(capture_width,
-            capture_height,
-            display_width,
-            display_height,
-            framerate,
-            flip_method);
-        std::cout << "Using pipeline: \n\t" << pipeline << "\n";
+			std::string pipeline = gstreamer_pipeline(capture_width,
+				capture_height,
+				display_width,
+				display_height,
+				framerate,
+				flip_method);
+			std::cout << "Using pipeline: \n\t" << pipeline << "\n";
 
-        cap.open(pipeline, cv::CAP_GSTREAMER);
-        if (!cap.isOpened()) {
-            std::cout << "Failed to open camera." << std::endl;
-            return (-1);
-        }
+			cap.open(pipeline, cv::CAP_GSTREAMER);
+			if (!cap.isOpened()) 
+				{
+					std::cout << "Failed to open camera." << std::endl;
+					return (-1);
+				}
 
-		cv::Size size = cv::Size((int)cap.get(cv::CAP_PROP_FRAME_WIDTH), (int)cap.get(cv::CAP_PROP_FRAME_HEIGHT));
-        if (output_type == "save") {
-			 // Get current time
-			auto t = std::time(nullptr);
-			auto tm = *std::localtime(&t);
+			cv::Size size = cv::Size((int)cap.get(cv::CAP_PROP_FRAME_WIDTH), (int)cap.get(cv::CAP_PROP_FRAME_HEIGHT));
+			if (output_type == "save") 
+				{
+					// Get current time
+					auto t = std::time(nullptr);
+					auto tm = *std::localtime(&t);
 
-			// Format date and time
-			std::ostringstream oss;
-			oss << std::put_time(&tm, "%Y-%m-%d_%H-%M-%S");
-			auto str = oss.str();
+					// Format date and time
+					std::ostringstream oss;
+					oss << std::put_time(&tm, "%Y-%m-%d_%H-%M-%S");
+					auto str = oss.str();
 
-			// Get filename without extension
-			size_t lastindex = input_value.find_last_of("."); 
-			std::string rawname = input_value.substr(0, lastindex);
+					// Get filename without extension
+					size_t lastindex = input_value.find_last_of("."); 
+					std::string rawname = input_value.substr(0, lastindex);
 
-			// Construct new filename
-			std::string new_filename = "Camera_detection_" + str + ".mp4";
+					// Construct new filename
+					std::string new_filename = "Camera_detection_" + str + ".mp4";
 
-			writer.open(new_filename, cv::VideoWriter::fourcc('m', 'p', '4', 'v'), 30, size);
-            
-        }
-    }
+					writer.open(new_filename, cv::VideoWriter::fourcc('m', 'p', '4', 'v'), 30, size);
+					
+				}
+		}
 
- cv::Mat res, image;
- cv::Size size = cv::Size{ 640, 640 };
- std::vector<Object> objs;
+	cv::Mat res, image;
+	cv::Size size = cv::Size{ 640, 640 };
+	std::vector<Object> objs;
 
- cv::namedWindow("result", cv::WINDOW_AUTOSIZE);
+	cv::namedWindow("result", cv::WINDOW_AUTOSIZE);
 
- int frame_count = 0;
+	int frame_count = 0;
 
- while (cap.read(image))
- {
- objs.clear();
- yolov8->copy_from_Mat(image, size);
- auto start = std::chrono::system_clock::now();
+	while (cap.read(image))
+	{
+		objs.clear();
+		yolov8->copy_from_Mat(image, size);
+		auto start = std::chrono::system_clock::now();
 
- if (frame_count % infer_rate == 0)
- {
- yolov8->infer();
- yolov8->postprocess(objs);
- }
+		if (frame_count % infer_rate == 0)
+			{
+				yolov8->infer();
+				yolov8->postprocess(objs);
+			}
 
- auto end = std::chrono::system_clock::now();
- yolov8->draw_objects(image, res, objs, CLASS_NAMES, COLORS, DISPALYED_CLASS_NAMES);
+		auto end = std::chrono::system_clock::now();
+		yolov8->draw_objects(image, res, objs, CLASS_NAMES, COLORS, DISPALYED_CLASS_NAMES);
 
- if (output_type == "save") {
- writer.write(res);
- }
+		if (output_type == "save") 
+			{
+				writer.write(res);
+			}
 
- auto tc = (double)
- std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() / 1000.;
- double fps = 1000 / tc;
+		auto tc = (double)
+		std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() / 1000.;
+		double fps = 1000 / tc;
 
- printf("cost %2.4lf ms (%2.4lf fps)\n", tc, fps);
+		printf("cost %2.4lf ms (%2.4lf fps)\n", tc, std::round(fps));
 
 
- if(output_type=="show"){
- cv::imshow("result", res);
- if (cv::waitKey(10) == 'q')
- {
- break;
- }
- }
+		if(output_type=="show")
+			{
+			cv::imshow("result", res);
+				if (cv::waitKey(10) == 'q')
+					{
+						break;
+					}
+			}
 
- frame_count++;
- }
+		frame_count++;
+	}
 
- cv::destroyAllWindows();
- delete yolov8;
- return 0;
+	cv::destroyAllWindows();
+	delete yolov8;
+	return 0;
 }
 
 
