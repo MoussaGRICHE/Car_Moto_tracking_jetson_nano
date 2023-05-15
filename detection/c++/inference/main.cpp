@@ -142,7 +142,9 @@ int main(int argc, char** argv)
 
 			// Get filename without extension
 			size_t lastindex = input_value.find_last_of("."); 
-			std::string rawname = input_value.substr(0, lastindex);
+			size_t lastSlash = input_value.find_last_of('/');
+    		size_t lastDot = input_value.find_last_of('.');
+    		std::string rawname = input_value.substr(lastSlash + 1, lastDot - lastSlash - 1);
 
 			// Construct new filename
 			std::string new_filename = rawname + "_detection_" + str + ".mp4";
