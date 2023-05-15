@@ -128,7 +128,7 @@ int main(int argc, char** argv)
  double fps = cap.get(cv::CAP_PROP_FPS);
  cv::Size size = cv::Size((int)cap.get(cv::CAP_PROP_FRAME_WIDTH), (int)cap.get(cv::CAP_PROP_FRAME_HEIGHT));
  if (output_type == "save") {
- writer.open("output.mp4", cv::VideoWriter::fourcc('m', 'p', '4', 'v'), fps, size);
+ writer.open("output.mp4", cv::VideoWriter::fourcc('m', 'p', '4', 'v'), 30, size);
  }
  }
  else
