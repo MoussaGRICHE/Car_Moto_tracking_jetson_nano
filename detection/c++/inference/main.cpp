@@ -116,7 +116,7 @@ int main(int argc, char** argv)
 		cap.open(input_value);
 		if (!cap.isOpened())
 		{
-			printf("can not open %s\n", path.c_str());
+			printf("can not open %s\n", input_value.c_str());
 			return -1;
 		}
 
