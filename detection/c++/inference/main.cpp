@@ -69,6 +69,7 @@ int main(int argc, char** argv)
     const std::string engine_file_path{ argv[1] };
     const std::string input_type{ argv[2] };
     std::string input_value;
+    std::string output_type{ argv[3] };
 
     std::vector<std::string> imagePathList;
     bool isVideo{ false };
@@ -79,8 +80,8 @@ int main(int argc, char** argv)
 
     if (input_type == "video")
     {
-        assert(argc == 4);
-        input_value = argv[3];
+        assert(argc == 5);
+        input_value = argv[4];
         if (IsFile(input_value))
         {
             std::string suffix = input_value.substr(input_value.find_last_of('.') + 1);
@@ -105,11 +106,12 @@ int main(int argc, char** argv)
 
     else if (input_type == "camera")
     {
-        assert(argc == 3);
+        assert(argc == 4);
         isCamera = true;
     }
 
     cv::VideoCapture cap;
+    cv::VideoWriter writer;
     if (isVideo)
     {
         cap.open(input_value);
@@ -117,6 +119,13 @@ int main(int argc, char** argv)
         {
             printf("can not open %s\n", input_value.c_str());
             return -1;
+        }
+        if (output_type == "save")
+        {
+            int frame_width = cap.get(cv::CAP_PROP_FRAME_WIDTH);
+            int frame_height = cap.get(cv::CAP_PROP_FRAME_HEIGHT);
+            int fps = cap.get(cv::CAP_PROP_FPS);
+            writer.open("output.mp4", cv::VideoWriter::fourcc('m', 'p', '4', 'v'), fps, cv::Size(frame_width, frame_height));
         }
     }
     else
@@ -165,19 +174,29 @@ int main(int argc, char** argv)
 
         auto end = std::chrono::system_clock::now();
         yolov8->draw_objects(image, res, objs, CLASS_NAMES, COLORS, DISPALYED_CLASS_NAMES);
+        
+        if (output_type == "save")
+            writer.write(res);
+
         auto tc = (double)
             std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() / 1000.;
+        
         printf("cost %2.4lf ms\n", tc);
-        cv::imshow("result", res);
-        if (cv::waitKey(10) == 'q')
+
+        if (output_type == "show")
         {
-            break;
+            cv::imshow("result", res);
+            if (cv::waitKey(10) == 'q')
+                break;
         }
 
         frame_count++;
     }
 
-cv::destroyAllWindows();
-delete yolov8;
-return 0;
+    cv::destroyAllWindows();
+    
+    delete yolov8;
+
+    return 0;
 }
+
