@@ -215,7 +215,7 @@ int main(int argc, char** argv)
  yolov8->postprocess(objs);
  }
 
- auto end = std::chrono::system_clock
+ auto end = std::chrono::system_clock;
  }
 
 
