@@ -115,11 +115,7 @@ int main(int argc, char** argv)
         isCamera = true;
     }
 
-    cv::Mat res, image;
-    cv::Size size = cv::Size{ 640, 640 };
-    std::vector<Object> objs;
-
-    cv::namedWindow("result", cv::WINDOW_AUTOSIZE);
+    
 
     if (isVideo || isCamera)
     {
@@ -127,65 +123,126 @@ int main(int argc, char** argv)
         if (isVideo)
         {
             cap.open(path);
+		if (!cap.isOpened())
+		{
+		    printf("can not open %s\n", path.c_str());
+		    return -1;
+		}
+
+		cv::Mat res, image;
+		cv::Size size = cv::Size{ 640, 640 };
+		std::vector<Object> objs;
+
+		cv::namedWindow("result", cv::WINDOW_AUTOSIZE);
+
+		int frame_count = 0;
+
+		while (cap.read(image))
+		{
+		    objs.clear();
+		    yolov8->copy_from_Mat(image, size);
+		    auto start = std::chrono::system_clock::now();
+
+		    if (frame_count % 2 == 0)
+		    {
+			yolov8->infer();
+			yolov8->postprocess(objs);
+		    }
+
+		    auto end = std::chrono::system_clock::now();
+		    yolov8->draw_objects(image, res, objs, CLASS_NAMES, COLORS, DISPALYED_CLASS_NAMES);
+		    auto tc = (double)
+			std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() / 1000.;
+		    printf("cost %2.4lf ms\n", tc);
+		    cv::imwrite("result.mp4", res);
+		    if (cv::waitKey(10) == 'q')
+		    {
+			break;
+		    }
+
+		    frame_count++;
+		}
+
         }
+
+ 	
+
         else
         {
-            int capture_width = 1280 ;
-			int capture_height = 720 ;
-			int display_width = 1280 ;
-			int display_height = 720 ;
-			int framerate = 30 ;
-			int flip_method = 0 ;
-
-			std::string pipeline = gstreamer_pipeline(capture_width,
-			capture_height,
-			display_width,
-			display_height,
-			framerate,
-			flip_method);
-			std::cout << "Using pipeline: \n\t" << pipeline << "\n";
 		
-			cv::VideoCapture cap(pipeline, cv::CAP_GSTREAMER);
+		
+	    int capture_width = 1280 ;
+	    int capture_height = 720 ;
+	    int display_width = 1280 ;
+	    int display_height = 720 ;
+	    int framerate = 30 ;
+	    int flip_method = 2 ;
+
+	    std::string pipeline = gstreamer_pipeline(capture_width,
+		capture_height,
+		display_width,
+		display_height,
+		framerate,
+		flip_method);
+	    std::cout << "Using pipeline: \n\t" << pipeline << "\n";
+	 
+	    cv::VideoCapture cap(pipeline, cv::CAP_GSTREAMER);
+	    if(!cap.isOpened()) {
+		std::cout<<"Failed to open camera."<<std::endl;
+		return (-1);
+	    }
+
+	    cv::Mat res, image;
+	    cv::Size size = cv::Size{ 640, 640 };
+	    std::vector<Object> objs;
+
+	    cv::namedWindow("result", cv::WINDOW_AUTOSIZE);
+	    
+	    int frame_count = 0;
+
+	while (cap.read(image))
+	{
+	    objs.clear();
+	    yolov8->copy_from_Mat(image, size);
+	    auto start = std::chrono::system_clock::now();
+
+	    if (frame_count % 2 == 0)
+	    {
+	        yolov8->infer();
+	        yolov8->postprocess(objs);
+	    }
+
+	    auto end = std::chrono::system_clock::now();
+	    yolov8->draw_objects(image, res, objs, CLASS_NAMES, COLORS, DISPALYED_CLASS_NAMES);
+	    auto tc = (double)
+	        std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() / 1000.;
+	    printf("cost %2.4lf ms\n", tc);
+	    cv::imshow("result", res);
+	    if (cv::waitKey(10) == 'q')
+	    {
+	        break;
+	    }
+
+	    frame_count++;
+	}
+
         }
 
-        if (!cap.isOpened())
-        {
-            printf("can not open %s\n", path.c_str());
-            return -1;
-        }
+       
 
-        int frame_count = 0;
-
-        while (cap.read(image))
-        {
-            objs.clear();
-            yolov8->copy_from_Mat(image, size);
-            auto start = std::chrono::system_clock::now();
-
-            if (frame_count % 2 == 0)
-            {
-                yolov8->infer();
-                yolov8->postprocess(objs);
-            }
-
-            auto end = std::chrono::system_clock::now();
-            yolov8->draw_objects(image, res, objs, CLASS_NAMES, COLORS, DISPALYED_CLASS_NAMES);
-            auto tc = (double)
-                std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() / 1000.;
-            printf("cost %2.4lf ms\n", tc);
-            cv::imshow("result", res);
-            if (cv::waitKey(10) == 'q')
-            {
-                break;
-            }
-
-            frame_count++;
-        }
+        
     }
     else
     {
         for (auto& path : imagePathList)
         {
+
+	    cv::Mat res, image;
+	    cv::Size size = cv::Size{ 640, 640 };
+	    std::vector<Object> objs;
+
+	    cv::namedWindow("result", cv::WINDOW_AUTOSIZE);
+
             objs.clear();
             image = cv::imread(path);
             yolov8->copy_from_Mat(image, size);
@@ -198,7 +255,7 @@ int main(int argc, char** argv)
                 std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() / 1000.;
             printf("cost %2.4lf ms\n", tc);
 
-			cv::imshow("result", res);
+			cv::imshow("result.mp4", res);
 			cv::waitKey(0);
 		}
 	}

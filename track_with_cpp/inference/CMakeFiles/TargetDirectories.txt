@@ -1,3 +1,0 @@
-/home/tts/Car_Moto_tracking_jetson_nano/track_with_cpp/inference/CMakeFiles/rebuild_cache.dir
-/home/tts/Car_Moto_tracking_jetson_nano/track_with_cpp/inference/CMakeFiles/yolov8.dir
-/home/tts/Car_Moto_tracking_jetson_nano/track_with_cpp/inference/CMakeFiles/edit_cache.dir
