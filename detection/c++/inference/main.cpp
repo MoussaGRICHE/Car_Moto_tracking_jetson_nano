@@ -105,8 +105,7 @@ int main(int argc, char** argv)
 
     else if (input_type == "camera")
     {
-        assert(argc == 4);
-		input_value = argv[3];
+        assert(argc == 3);
         isCamera = true;
     }
 
@@ -137,7 +136,7 @@ int main(int argc, char** argv)
             flip_method);
         std::cout << "Using pipeline: \n\t" << pipeline << "\n";
 
-        cap.open(input_value);
+        cap.open(pipeline, cv::CAP_GSTREAMER);
         if (!cap.isOpened()) {
             std::cout << "Failed to open camera." << std::endl;
             return (-1);
