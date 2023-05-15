@@ -199,7 +199,7 @@ int main(int argc, char** argv)
  frame_count++;
  }
 
- cv:destroyAllWindows();
+ cv::destroyAllWindows();
  delete yolov8;
  return 0;
 }
