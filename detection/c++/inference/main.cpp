@@ -74,13 +74,13 @@ int main(int argc, char** argv)
     bool isVideo{ false };
     bool isCamera{ false };
 
-    assert(argc == 3);
-
     auto yolov8 = new YOLOv8(engine_file_path);
     yolov8->make_pipe(true);
 	
 	if (input_type == "video")
 	{
+		assert(argc == 4);
+        input_value = argv[3];
 		if (IsFile(input_value))
 		{
 			std::string suffix = input_value.substr(input_value.find_last_of('.') + 1);
@@ -105,6 +105,7 @@ int main(int argc, char** argv)
     
     else if (input_type == "camera")
     {
+		assert(argc == 3);
         isCamera = true;
     }
 
@@ -145,7 +146,7 @@ int main(int argc, char** argv)
 			auto tc = (double)
 			std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() / 1000.;
 			printf("cost %2.4lf ms\n", tc);
-			cv::imwrite("result.mp4", res);
+			cv::imshow("result", res);
 			if (cv::waitKey(10) == 'q')
 			{
 			break;
