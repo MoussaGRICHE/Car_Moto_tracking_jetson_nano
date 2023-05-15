@@ -177,7 +177,19 @@ int main(int argc, char** argv)
 
  cv::Size size = cv::Size((int)cap.get(cv::CAP_PROP_FRAME_WIDTH), (int)cap.get(cv::CAP_PROP_FRAME_HEIGHT));
  if (output_type == "save") {
-	// Construct new filename
+ auto t = std::time(nullptr);
+ auto tm = *std::localtime(&t);
+
+ // Format date and time
+ std::ostringstream oss;
+ oss << std::put_time(&tm, "%Y-%m-%d_%H-%M-%S");
+ auto str = oss.str();
+
+ // Get filename without extension
+ size_t lastindex = input_value.find_last_of("."); 
+ std::string rawname = input_value.substr(0, lastindex);
+
+ // Construct new filename
  std::string new_filename = "Camera_detection_" + str + ".mp4";
  writer.open(new_filename, cv::VideoWriter::fourcc('m', 'p', '4', 'v'), 30, size);
  }
@@ -204,6 +216,7 @@ int main(int argc, char** argv)
  }
 
  auto end = std::chrono::system_clock
+ }
 
 
 
