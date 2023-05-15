@@ -69,7 +69,7 @@ int main(int argc, char** argv)
     const std::string engine_file_path{ argv[1] };
     const std::string input_type{ argv[2] };
     std::string input_value;
-	std::string infer_frame{ argv[4] };
+	int::string infer_rate{ argv[4] };
     std::string output_type{ argv[5] };
 
     std::vector<std::string> imagePathList;
@@ -165,7 +165,7 @@ int main(int argc, char** argv)
         yolov8->copy_from_Mat(image, size);
         auto start = std::chrono::system_clock::now();
 
-        if (frame_count % infer_frame == 0)
+        if (frame_count % infer_rate == 0)
         {
             yolov8->infer();
             yolov8->postprocess(objs);
