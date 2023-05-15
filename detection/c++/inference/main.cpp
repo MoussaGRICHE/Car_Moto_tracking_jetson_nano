@@ -116,9 +116,7 @@ int main(int argc, char** argv)
     }
 
     cv::VideoCapture cap;
-    int frame_width = cap.get(CAP_PROP_FRAME_WIDTH);//Getting the frame height//
-	int frame_height = cap.get(CAP_PROP_FRAME_HEIGHT);//Getting the frame width//
-	VideoWriter video("video1.mp4",10,17,Size(frame_width, frame_height));
+    cv::VideoWriter writer;
     if (isVideo)
     {
         cap.open(input_value);
@@ -128,10 +126,9 @@ int main(int argc, char** argv)
             return -1;
         }
         
+        cv::Size size = cv::Size((int)cap.get(cv::CAP_PROP_FRAME_WIDTH), (int)cap.get(cv::CAP_PROP_FRAME_HEIGHT));
         if (output_type == "save") {
-            int frame_width = cap.get(CAP_PROP_FRAME_WIDTH);//Getting the frame height//
-			int frame_height = cap.get(CAP_PROP_FRAME_HEIGHT);//Getting the frame width//
-			VideoWriter video("video1.mp4",10,17,Size(frame_width, frame_height));
+            writer.open("output.mp4", cv::VideoWriter::fourcc('m', 'p', '4', 'v'), 30, size);
         }
     }
     else
@@ -157,62 +154,60 @@ int main(int argc, char** argv)
             return (-1);
         }
 
-		
+		cv::Size size = cv::Size((int)cap.get(cv::CAP_PROP_FRAME_WIDTH), (int)cap.get(cv::CAP_PROP_FRAME_HEIGHT));
         if (output_type == "save") {
-            int frame_width = cap.get(CAP_PROP_FRAME_WIDTH);//Getting the frame height//
-			int frame_height = cap.get(CAP_PROP_FRAME_HEIGHT);//Getting the frame width//
-			VideoWriter video("video1.mp4",10,17,Size(frame_width, frame_height));
+            writer.open("output.mp4", cv::VideoWriter::fourcc('m', 'p', '4', 'v'), 30, size);
         }
     }
 
-	cv::Mat res, image;
-	cv::Size size = cv::Size{ 640, 640 };
-	std::vector<Object> objs;
+ cv::Mat res, image;
+ cv::Size size = cv::Size{ 640, 640 };
+ std::vector<Object> objs;
 
-	cv::namedWindow("result", cv::WINDOW_AUTOSIZE);
+ cv::namedWindow("result", cv::WINDOW_AUTOSIZE);
 
-	int frame_count = 0;
+ int frame_count = 0;
 
-	while (cap.read(image))
-	{
-	objs.clear();
-	yolov8->copy_from_Mat(image, size);
-	auto start = std::chrono::system_clock::now();
+ while (cap.read(image))
+ {
+ objs.clear();
+ yolov8->copy_from_Mat(image, size);
+ auto start = std::chrono::system_clock::now();
 
-	if (frame_count % infer_rate == 0)
-	{
-	yolov8->infer();
-	yolov8->postprocess(objs);
-	}
+ if (frame_count % infer_rate == 0)
+ {
+ yolov8->infer();
+ yolov8->postprocess(objs);
+ }
 
-	auto end = std::chrono::system_clock::now();
-	yolov8->draw_objects(image, res, objs, CLASS_NAMES, COLORS, DISPALYED_CLASS_NAMES);
+ auto end = std::chrono::system_clock::now();
+ yolov8->draw_objects(image, res, objs, CLASS_NAMES, COLORS, DISPALYED_CLASS_NAMES);
 
-	if (output_type == "save") {
-		video.write(res);
-	}
+ if (output_type == "save") {
+ writer.write(res);
+ }
 
-	auto tc = (double)
-	std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() / 1000.;
-	double fps = 1000 / tc;
+ auto tc = (double)
+ std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() / 1000.;
+ double fps = 1000 / tc;
 
-	printf("cost %2.4lf ms (%2.4lf fps)\n", tc, fps);
+ printf("cost %2.4lf ms (%2.4lf fps)\n", tc, fps);
 
 
-	if(output_type=="show"){
-	cv::imshow("result", res);
-	if (cv::waitKey(10) == 'q')
-	{
-	break;
-	}
-	}
+ if(output_type=="show"){
+ cv::imshow("result", res);
+ if (cv::waitKey(10) == 'q')
+ {
+ break;
+ }
+ }
 
-	frame_count++;
-	}
+ frame_count++;
+ }
 
-	cv::destroyAllWindows();
-	delete yolov8;
-	return 0;
+ cv::destroyAllWindows();
+ delete yolov8;
+ return 0;
 }
 
 
