@@ -69,7 +69,8 @@ int main(int argc, char** argv)
     const std::string engine_file_path{ argv[1] };
     const std::string input_type{ argv[2] };
     std::string input_value;
-    std::string output_type{ argv[3] };
+	std::string infer_frame{ argv[4] };
+    std::string output_type{ argv[5] };
 
     std::vector<std::string> imagePathList;
     bool isVideo{ false };
@@ -80,8 +81,8 @@ int main(int argc, char** argv)
 
     if (input_type == "video")
     {
-        assert(argc == 5);
-        input_value = argv[4];
+        assert(argc == 6);
+        input_value = argv[3];
         if (IsFile(input_value))
         {
             std::string suffix = input_value.substr(input_value.find_last_of('.') + 1);
@@ -106,7 +107,7 @@ int main(int argc, char** argv)
 
     else if (input_type == "camera")
     {
-        assert(argc == 4);
+        assert(argc == 5);
         isCamera = true;
     }
 
@@ -164,7 +165,7 @@ int main(int argc, char** argv)
         yolov8->copy_from_Mat(image, size);
         auto start = std::chrono::system_clock::now();
 
-        if (frame_count % 2 == 0)
+        if (frame_count % infer_frame == 0)
         {
             yolov8->infer();
             yolov8->postprocess(objs);
