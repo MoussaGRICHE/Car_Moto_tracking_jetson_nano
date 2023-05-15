@@ -68,7 +68,7 @@ int main(int argc, char** argv)
 {
     const std::string engine_file_path{ argv[1] };
     const std::string input_type{ argv[2] };
-    const std::string input_value{ argv[3] };
+    std::string input_value;
 
     std::vector<std::string> imagePathList;
     bool isVideo{ false };
