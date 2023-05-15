@@ -136,7 +136,7 @@ int main(int argc, char** argv)
             flip_method);
         std::cout << "Using pipeline: \n\t" << pipeline << "\n";
 
-        cv::VideoCapture cap(pipeline, cv::CAP_GSTREAMER);
+        cap.open(pipeline, cv::CAP_GSTREAMER);
         if (!cap.isOpened()) {
             std::cout << "Failed to open camera." << std::endl;
             return (-1);
@@ -181,4 +181,3 @@ cv::destroyAllWindows();
 delete yolov8;
 return 0;
 }
-
