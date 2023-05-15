@@ -53,9 +53,9 @@ And build:
 
 ``` shell
 export root=${PWD}
-cd src/jetson/detect
+cd csrc/jetson/detect
 mkdir build
-cmake ..
+cmake ./CmakeLists.txt
 make
 mv yolov8 ${root}
 cd ${root}
