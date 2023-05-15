@@ -67,7 +67,8 @@ std::string gstreamer_pipeline (int capture_width, int capture_height, int displ
 int main(int argc, char** argv)
 {
     const std::string engine_file_path{ argv[1] };
-    const std::string path{ argv[2] };
+    const std::string input_type{ argv[2] };
+    const std::string input_value{ argv[3] };
 
     std::vector<std::string> imagePathList;
     bool isVideo{ false };
@@ -77,9 +78,10 @@ int main(int argc, char** argv)
 
     auto yolov8 = new YOLOv8(engine_file_path);
     yolov8->make_pipe(true);
-	if (path == "video")
+	
+	if (input_type == "video")
 	{
-		if (IsFile(path))
+		if (IsFile(input_value))
 		{
 			std::string suffix = path.substr(path.find_last_of('.') + 1);
 			if (
@@ -101,7 +103,7 @@ int main(int argc, char** argv)
 		}
 	}
     
-    else if (path == "camera")
+    else if (input_type == "camera")
     {
         isCamera = true;
     }
