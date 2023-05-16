@@ -226,7 +226,7 @@ int main(int argc, char** argv)
 		std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() / 1000.;
 		double fps = 1000 / tc;
 
-		printf("cost %2.4lf ms (%2.4lf fps)\n", tc, std::round(fps));
+		printf("cost %2.4lf ms (%0.0lf fps)\n", tc, std::round(fps));
 
 
 		if(output_type=="show")
