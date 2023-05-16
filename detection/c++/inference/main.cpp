@@ -198,8 +198,12 @@ int main(int argc, char** argv)
 	cv::Size size = cv::Size{ 640, 640 };
 	std::vector<Object> objs;
 
+	int screenWidth = GetSystemMetrics(SM_CXSCREEN);
+	int screenHeight = GetSystemMetrics(SM_CYSCREEN);
+	int taskbarHeight = GetSystemMetrics(SM_CYCAPTION);
+
 	cv::namedWindow("result", cv::WINDOW_NORMAL);
-	cv::setWindowProperty("result", cv::WND_PROP_FULLSCREEN, cv::WINDOW_FULLSCREEN);
+	cv::resizeWindow("result", screenWidth, screenHeight - taskbarHeight);
 
 
 	int frame_count = 0;
