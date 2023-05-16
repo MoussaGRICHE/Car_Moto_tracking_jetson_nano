@@ -229,14 +229,15 @@ int main(int argc, char** argv)
 
 
 		if(output_type=="show")
-{
-			cv::namedWindow("result", cv::WINDOW_FULLSCREEN | cv::WINDOW_GUI_EXPANDED);
-			cv::imshow("result", res);
-			if (cv::waitKey(10) == 'q')
-				{
-					break;
-				}
-}
+		{
+		cv::namedWindow("result", cv::WINDOW_NORMAL | cv::WINDOW_GUI_EXPANDED);
+		cv::setWindowProperty("result", cv::WND_PROP_FULLSCREEN, cv::WINDOW_FULLSCREEN);
+		cv::imshow("result", res);
+		if (cv::waitKey(10) == 'q')
+			{
+			break;
+			}
+		}
 
 		frame_count++;
 	}
