@@ -198,7 +198,9 @@ int main(int argc, char** argv)
 	cv::Size size = cv::Size{ 640, 640 };
 	std::vector<Object> objs;
 
-	cv::namedWindow("result", cv::WINDOW_AUTOSIZE);
+	cv::namedWindow("result", cv::WINDOW_NORMAL);
+	cv::setWindowProperty("result", cv::WND_PROP_FULLSCREEN, cv::WINDOW_FULLSCREEN);
+
 
 	int frame_count = 0;
 
