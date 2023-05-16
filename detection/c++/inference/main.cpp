@@ -198,13 +198,6 @@ int main(int argc, char** argv)
 	cv::Size size = cv::Size{ 640, 640 };
 	std::vector<Object> objs;
 
-	int screenWidth = GetSystemMetrics(SM_CXSCREEN);
-	int screenHeight = GetSystemMetrics(SM_CYSCREEN);
-	int taskbarHeight = GetSystemMetrics(SM_CYCAPTION);
-
-	cv::namedWindow("result", cv::WINDOW_NORMAL);
-	cv::resizeWindow("result", screenWidth, screenHeight - taskbarHeight);
-
 
 	int frame_count = 0;
 
@@ -236,13 +229,14 @@ int main(int argc, char** argv)
 
 
 		if(output_type=="show")
-			{
+{
+			cv::namedWindow("result", cv::WINDOW_FULLSCREEN | cv::WINDOW_GUI_EXPANDED);
 			cv::imshow("result", res);
-				if (cv::waitKey(10) == 'q')
-					{
-						break;
-					}
-			}
+			if (cv::waitKey(10) == 'q')
+				{
+					break;
+				}
+}
 
 		frame_count++;
 	}
