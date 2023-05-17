@@ -419,7 +419,6 @@ int main(int argc, char** argv) {
 
     IRuntime* runtime = createInferRuntime(gLogger);
     assert(runtime != nullptr);
-    bool didInitPlugins = initLibNvInferPlugins(nullptr, "");
     ICudaEngine* engine = runtime->deserializeCudaEngine(trtModelStream, size);
     assert(engine != nullptr); 
     IExecutionContext* context = engine->createExecutionContext();
