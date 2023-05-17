@@ -25,6 +25,8 @@ message(STATUS "OpenCV Headers: \n${OpenCV_INCLUDE_DIRS}\n")
 set(TensorRT_INCLUDE_DIRS /usr/include/aarch64-linux-gnu)
 set(TensorRT_LIBRARIES /usr/lib/aarch64-linux-gnu)
 
+# Eigen3
+include_directories(/usr/include/eigen3)
 
 message(STATUS "TensorRT Libs: \n${TensorRT_LIBRARIES}\n")
 message(STATUS "TensorRT Headers: \n${TensorRT_INCLUDE_DIRS}\n")
