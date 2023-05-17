@@ -15,17 +15,34 @@ include_directories(${PROJECT_SOURCE_DIR}/include)
 link_directories(${PROJECT_SOURCE_DIR}/include)
 
 # include and link dirs of cuda and tensorrt, you need adapt them if yours are different
-# cuda
-include_directories(/usr/include)
-link_directories(/usr/lib64)
 
-# cudnn
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -O3 -g")
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_BUILD_TYPE Release)
+option(CUDA_USE_STATIC_CUDA_RUNTIME OFF)
+
+# CUDA
+find_package(CUDA REQUIRED)
+message(STATUS "CUDA Libs: \n${CUDA_LIBRARIES}\n")
+message(STATUS "CUDA Headers: \n${CUDA_INCLUDE_DIRS}\n")
+
+# CUDNN
 include_directories(/data/cuda/cuda-10.2/include)
 link_directories(/data/cuda/cuda-10.2/lib64)
 
-# tensorrt
-include_directories(/usr/include/aarch64-linux-gnu)
-link_directories(/usr/lib/aarch64-linux-gnu)
+# OpenCV
+find_package(OpenCV REQUIRED)
+message(STATUS "OpenCV Libs: \n${OpenCV_LIBS}\n")
+message(STATUS "OpenCV Libraries: \n${OpenCV_LIBRARIES}\n")
+message(STATUS "OpenCV Headers: \n${OpenCV_INCLUDE_DIRS}\n")
+
+# TensorRT
+set(TensorRT_INCLUDE_DIRS /usr/include/aarch64-linux-gnu)
+set(TensorRT_LIBRARIES /usr/lib/aarch64-linux-gnu)
+
+
+message(STATUS "TensorRT Libs: \n${TensorRT_LIBRARIES}\n")
+message(STATUS "TensorRT Headers: \n${TensorRT_INCLUDE_DIRS}\n")
 
 # Eigen3
 include_directories(/usr/include/eigen3)
