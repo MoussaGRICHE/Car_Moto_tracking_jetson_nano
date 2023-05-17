@@ -37,8 +37,8 @@ Please modify CLASS_NAMES and COLORS in main.cpp for yourself.
 And build:
 
     cd inference
-    mkdir build
-    cmake ./CMakeLists.txt
+    mkdir build & cd mkdir
+    cmake ..
     make
     cp yolov8 ${root}/track_with_cpp
     cd ${root}/track_with_cpp
