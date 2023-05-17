@@ -10,6 +10,7 @@
 #include "cuda_runtime_api.h"
 #include "logging.h"
 #include "BYTETracker.h"
+#include "yolov8.hpp"
 
 #define CHECK(status) \
     do\
