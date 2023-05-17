@@ -76,6 +76,7 @@ std::string gstreamer_pipeline (int capture_width, int capture_height, int displ
            std::to_string(display_height) + ", format=(string)BGRx ! videoconvert ! video/x-raw, format=(string)BGR ! appsink";
 }
 
+static Logger gLogger;
 
 int main(int argc, char** argv)
 {
@@ -203,6 +204,9 @@ int main(int argc, char** argv)
 					
 				}
 		}
+
+	IRuntime* runtime = createInferRuntime(gLogger);
+
 
 	cv::Mat res, image;
 	cv::Size size = cv::Size{ 640, 640 };
