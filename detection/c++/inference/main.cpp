@@ -4,12 +4,9 @@
 #include "chrono"
 #include "yolov8.hpp"
 #include "opencv2/opencv.hpp"
-#include <ctime>
-#include <iomanip>
-#include <sstream>
 
 const std::vector<std::string> CLASS_NAMES = {
-	"person", "bicycle", "car", "motorcycle", "airplane", "bus",
+	"car", "motorcycle", "person", "bicycle", "airplane", "bus",
 	"train", "truck", "boat", "traffic light", "fire hydrant",
 	"stop sign", "parking meter", "bench", "bird", "cat",
 	"dog", "horse", "sheep", "cow", "elephant",
@@ -198,7 +195,6 @@ int main(int argc, char** argv)
 	cv::Size size = cv::Size{ 640, 640 };
 	std::vector<Object> objs;
 
-
 	int frame_count = 0;
 
 	while (cap.read(image))
@@ -211,8 +207,9 @@ int main(int argc, char** argv)
 			{
 				yolov8->infer();
 				yolov8->postprocess(objs);
+				
 			}
-
+		
 		auto end = std::chrono::system_clock::now();
 		yolov8->draw_objects(image, res, objs, CLASS_NAMES, COLORS, DISPALYED_CLASS_NAMES);
 
@@ -246,8 +243,3 @@ int main(int argc, char** argv)
 	delete yolov8;
 	return 0;
 }
-
-
-
-
-
