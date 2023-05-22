@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.6)
-project(deepsort)
+project(yolov8_deepsort)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 set(CMAKE_BUILD_TYPE Release)
@@ -31,10 +31,10 @@ target_link_libraries(deepsort
 
 
 # ===== yolov8_deepsort =====
-add_executable(yolov8 ${PROJECT_SOURCE_DIR}/main.cpp)
-target_link_libraries(yolov8 
+add_executable(yolov8_deepsort ${PROJECT_SOURCE_DIR}/main.cpp)
+target_link_libraries(yolov8_deepsort
     ${CUDA_LIBS} ${OpenCV_LIBS} 
     cudart nvinfer nvonnxparser deepsort
 )
 
-target_link_libraries(yolov8 /usr/lib/x86_64-linux-gnu/libnvinfer_plugin.so)
+target_link_libraries(yolov8_deepsort /usr/lib/x86_64-linux-gnu/libnvinfer_plugin.so)
