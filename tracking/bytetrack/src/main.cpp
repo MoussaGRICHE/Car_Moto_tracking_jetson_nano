@@ -213,7 +213,6 @@ int main(int argc, char** argv)
 
     int total_ms = 0;
 
-    int frame_count = 0;
     int infer_frame_count = 0;  // Counter for frames processed for inference and tracking
 
     while (cap.read(image))
@@ -245,10 +244,36 @@ int main(int argc, char** argv)
 
             auto end = std::chrono::system_clock::now();
 
-            if (total_ms != 0) {
-                putText(image, format("fps: %d num: %d", frame_count * 1000000 / total_ms, output_stracks.size()),
-                    Point(0, 30), 0, 0.6, Scalar(0, 0, 255), 2, LINE_AA);
-            }
+			double fps = 1000.0 / std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+
+			// Print the FPS value on the image
+			putText(image, "FPS: " + std::to_string(static_cast<int>(fps)),
+            	Point(0, 30), FONT_HERSHEY_SIMPLEX, 0.6, Scalar(0, 0, 255), 2, LINE_AA);
+
+
+             // Print the number of detected objects for each class name
+			std::map<std::string, int> classCounts;
+			for (const auto& obj : objs)
+			{
+				if (obj.label >= 0 && obj.label < CLASS_NAMES.size())
+				{
+					std::string className = CLASS_NAMES[obj.label];
+					if (std::find(DISPALYED_CLASS_NAMES.begin(), DISPALYED_CLASS_NAMES.end(), className) != DISPALYED_CLASS_NAMES.end())
+					{
+						classCounts[className]++;
+					}
+				}
+			}
+
+			int yPos = 60;
+			for (const auto& className : DISPALYED_CLASS_NAMES)
+			{
+				putText(image, className + ": " + std::to_string(classCounts[className]),
+					Point(0, yPos), 0, 0.6, Scalar(0, 0, 255), 2, LINE_AA);
+				yPos += 30;
+			}
+
+
 
             total_ms = total_ms + chrono::duration_cast<chrono::microseconds>(end - start).count();
 
@@ -259,9 +284,7 @@ int main(int argc, char** argv)
                 writer.write(res);
             }
 
-            auto tc = (double)
-                std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() / 1000.;
-            double fps = 1000 / tc;
+            double tc = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() / 1000.;
 
             printf("cost %2.4lf ms (%0.0lf fps)\n", tc, std::round(fps));
 
@@ -277,7 +300,6 @@ int main(int argc, char** argv)
             }
         }
 
-        frame_count++;
         infer_frame_count++;
     }
 
