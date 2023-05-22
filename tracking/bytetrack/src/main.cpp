@@ -215,6 +215,8 @@ int main(int argc, char** argv)
 
 	int frame_count = 0;
 
+	std::vector<STrack> output_stracks;
+
 	while (cap.read(image))
 	{
 		
@@ -223,11 +225,15 @@ int main(int argc, char** argv)
 
 		auto start = std::chrono::system_clock::now();
 
-
-		yolov8->infer();
-		yolov8->postprocess(objs);
-		vector<STrack> output_stracks = tracker.update(objs);
+		if (frame_count % infer_rate)
+		{
+			yolov8->infer();
+			yolov8->postprocess(objs);
+			vector<STrack> output_stracks = tracker.update(objs);
+		}
 		
+		
+
 		for (int i = 0; i < output_stracks.size(); i++) {
 			vector<float> tlwh = output_stracks[i].tlwh;
 			Scalar s = tracker.get_color(output_stracks[i].track_id);
@@ -240,6 +246,8 @@ int main(int argc, char** argv)
 			// Add the updated Object instance to the objs vector
 			objs.push_back(obj);
 		}
+		
+		auto end = std::chrono::system_clock::now();
 
 		if (total_ms != 0) {
 			putText(image, format("fps: %d num: %d", frame_count * 1000000 / total_ms, output_stracks.size()),
@@ -247,7 +255,7 @@ int main(int argc, char** argv)
 		}
 
 
-		auto end = std::chrono::system_clock::now();
+		
 
 		total_ms = total_ms + chrono::duration_cast<chrono::microseconds>(end - start).count();
 		
