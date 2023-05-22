@@ -221,11 +221,13 @@ int main(int argc, char** argv)
     {
         if (infer_frame_count % infer_rate == 0)  // Perform inference and tracking only for selected frames
         {
+			auto start = std::chrono::system_clock::now();
+
             objs.clear();
 			track_objs.clear();
             yolov8->copy_from_Mat(image, size);
 
-            auto start = std::chrono::system_clock::now();
+            
 
             yolov8->infer();
             yolov8->postprocess(objs);
@@ -297,7 +299,7 @@ int main(int argc, char** argv)
 
             double tc = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() / 1000.;
 
-            printf("cost %2.4lf ms (%0.0lf fps)\n", tc, std::round(infer_fps));
+            printf("cost %2.4lf ms (%0.0lf fps, 1/ %d frame traited)\n", tc, std::round(infer_fps), infer_rate);
 
             if (output_type == "show")
             {
