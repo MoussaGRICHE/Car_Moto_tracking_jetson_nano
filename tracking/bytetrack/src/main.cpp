@@ -254,17 +254,6 @@ int main(int argc, char** argv)
 				track_objs.push_back(obj);
 			}
 
-            auto end = std::chrono::system_clock::now();
-
-
-			double infer_fps = (1000.0 / std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count()) * infer_rate;
-
-
-			// Print the FPS value on the image
-			putText(image, "FPS: " + std::to_string(static_cast<int>(infer_fps)),
-            	Point(0, 30), FONT_HERSHEY_SIMPLEX, 0.6, Scalar(0, 0, 255), 2, LINE_AA);
-
-
              // Print the number of detected objects for each class name
 			std::map<std::string, int> classCounts;
 			for (const auto& obj : objs)
@@ -288,18 +277,21 @@ int main(int argc, char** argv)
 			}
 
 
-            total_ms = total_ms + chrono::duration_cast<chrono::microseconds>(end - start).count();
-
             yolov8->draw_objects(image, res, track_objs, CLASS_NAMES, COLORS, DISPALYED_CLASS_NAMES);
 
-            if (output_type == "save")
+			auto end = std::chrono::system_clock::now();
+
+            double tc = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() / 1000.;
+			double infer_fps = (1000.0 / tc) * infer_rate;
+
+            printf("cost %2.4lf ms (%0.0lf fps, 1/ %d frame traited)\n", tc, std::round(infer_fps), infer_rate);
+
+
+			  if (output_type == "save")
             {
                 writer.write(res);
             }
 
-            double tc = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() / 1000.;
-
-            printf("cost %2.4lf ms (%0.0lf fps, 1/ %d frame traited)\n", tc, std::round(infer_fps), infer_rate);
 
             if (output_type == "show")
             {
