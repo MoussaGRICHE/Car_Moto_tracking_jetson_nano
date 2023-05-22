@@ -208,6 +208,7 @@ int main(int argc, char** argv)
     cv::Mat res, image;
     cv::Size size = cv::Size{ 640, 640 };
     std::vector<Object> objs;
+	std::vector<Object> track_objs;
 
     BYTETracker tracker(fps, 30);
 
@@ -221,6 +222,7 @@ int main(int argc, char** argv)
         if (infer_frame_count % infer_rate == 0)  // Perform inference and tracking only for selected frames
         {
             objs.clear();
+			track_objs.clear();
             yolov8->copy_from_Mat(image, size);
 
             auto start = std::chrono::system_clock::now();
@@ -230,17 +232,25 @@ int main(int argc, char** argv)
 
             vector<STrack> output_stracks = tracker.update(objs);
 
-            for (int i = 0; i < output_stracks.size(); i++) {
-                vector<float> tlwh = output_stracks[i].tlwh;
-                Scalar s = tracker.get_color(output_stracks[i].track_id);
 
-                // Create a new Object instance and assign the tracker ID
-                Object obj;
-                obj.tracker_id = output_stracks[i].track_id;
+			for (int i = 0; i < output_stracks.size(); i++) {
+				vector<float> tlwh = output_stracks[i].tlwh;
+				Scalar s = tracker.get_color(output_stracks[i].track_id);
 
-                // Add the updated Object instance to the objs vector
-                objs.push_back(obj);
-            }
+				// Create a new Object instance and assign the tracker ID
+				Object obj;
+				obj.rect = cv::Rect_<float>(
+											output_stracks[i].tlwh[0],  // x
+											output_stracks[i].tlwh[1],  // y
+											output_stracks[i].tlwh[2],  // width
+											output_stracks[i].tlwh[3]   // height
+										);
+				obj.label = objs[i].label;
+				obj.tracker_id = output_stracks[i].track_id;
+
+				// Add the updated Object instance to the objs vector
+				track_objs.push_back(obj);
+			}
 
             auto end = std::chrono::system_clock::now();
 
@@ -278,7 +288,7 @@ int main(int argc, char** argv)
 
             total_ms = total_ms + chrono::duration_cast<chrono::microseconds>(end - start).count();
 
-            yolov8->draw_objects(image, res, objs, CLASS_NAMES, COLORS, DISPALYED_CLASS_NAMES);
+            yolov8->draw_objects(image, res, track_objs, CLASS_NAMES, COLORS, DISPALYED_CLASS_NAMES);
 
             if (output_type == "save")
             {
