@@ -236,7 +236,6 @@ int main(int argc, char** argv)
 
                 // Create a new Object instance and assign the tracker ID
                 Object obj;
-                obj.rect = Rect(tlwh[0], tlwh[1], tlwh[2], tlwh[3]);
                 obj.tracker_id = output_stracks[i].track_id;
 
                 // Add the updated Object instance to the objs vector
