@@ -213,6 +213,7 @@ int main(int argc, char** argv)
 
     int total_ms = 0;
 
+    int frame_count = 0;
     int infer_frame_count = 0;  // Counter for frames processed for inference and tracking
 
     while (cap.read(image))
@@ -244,10 +245,12 @@ int main(int argc, char** argv)
 
             auto end = std::chrono::system_clock::now();
 
-			double fps = 1000.0 / std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+
+			double infer_fps = (1000.0 / std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count()) * infer_rate;
+
 
 			// Print the FPS value on the image
-			putText(image, "FPS: " + std::to_string(static_cast<int>(fps)),
+			putText(image, "FPS: " + std::to_string(static_cast<int>(infer_fps)),
             	Point(0, 30), FONT_HERSHEY_SIMPLEX, 0.6, Scalar(0, 0, 255), 2, LINE_AA);
 
 
@@ -274,7 +277,6 @@ int main(int argc, char** argv)
 			}
 
 
-
             total_ms = total_ms + chrono::duration_cast<chrono::microseconds>(end - start).count();
 
             yolov8->draw_objects(image, res, objs, CLASS_NAMES, COLORS, DISPALYED_CLASS_NAMES);
@@ -286,7 +288,7 @@ int main(int argc, char** argv)
 
             double tc = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() / 1000.;
 
-            printf("cost %2.4lf ms (%0.0lf fps)\n", tc, std::round(fps));
+            printf("cost %2.4lf ms (%0.0lf fps)\n", tc, std::round(infer_fps));
 
             if (output_type == "show")
             {
@@ -300,6 +302,7 @@ int main(int argc, char** argv)
             }
         }
 
+        frame_count++;
         infer_frame_count++;
     }
 
