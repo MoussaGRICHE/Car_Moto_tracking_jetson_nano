@@ -4,11 +4,12 @@
 #include <vector>
 
 struct Object
-	{
-		cv::Rect_<float> rect;
-		int label;
-		float prob;
-	};
+{
+    cv::Rect_<float> rect;
+    int label;
+    float prob;
+    int tracker_id; 
+};
 
 
 class BYTETracker

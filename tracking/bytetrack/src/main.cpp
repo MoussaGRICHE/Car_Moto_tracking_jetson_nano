@@ -231,10 +231,16 @@ int main(int argc, char** argv)
 		for (int i = 0; i < output_stracks.size(); i++) {
 			vector<float> tlwh = output_stracks[i].tlwh;
 			Scalar s = tracker.get_color(output_stracks[i].track_id);
-			putText(image, "Id: " + to_string(output_stracks[i].track_id), Point(tlwh[0], tlwh[1] - 5),
-					FONT_HERSHEY_SIMPLEX, 0.6, Scalar(0, 0, 255), 2, LINE_AA);
-			rectangle(image, Rect(tlwh[0], tlwh[1], tlwh[2], tlwh[3]), s, 2);
+
+			// Create a new Object instance and assign the tracker ID
+			Object obj;
+			obj.rect = Rect(tlwh[0], tlwh[1], tlwh[2], tlwh[3]);
+			obj.tracker_id = output_stracks[i].track_id;
+
+			// Add the updated Object instance to the objs vector
+			objs.push_back(obj);
 		}
+
 		if (total_ms != 0) {
 			putText(image, format("fps: %d num: %d", frame_count * 1000000 / total_ms, output_stracks.size()),
 					Point(0, 30), 0, 0.6, Scalar(0, 0, 255), 2, LINE_AA);
