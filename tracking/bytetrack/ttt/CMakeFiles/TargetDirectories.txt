@@ -1,0 +1,3 @@
+/home/moussa/Car_Moto_tracking_jetson_nano/tracking/bytetrack/build/CMakeFiles/yolov8_bytetrack.dir
+/home/moussa/Car_Moto_tracking_jetson_nano/tracking/bytetrack/build/CMakeFiles/edit_cache.dir
+/home/moussa/Car_Moto_tracking_jetson_nano/tracking/bytetrack/build/CMakeFiles/rebuild_cache.dir
