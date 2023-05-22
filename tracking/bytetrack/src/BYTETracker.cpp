@@ -51,7 +51,6 @@ vector<STrack> BYTETracker::update(const vector<Object>& objects)
 			tlbr_[3] = objects[i].rect.y + objects[i].rect.height;
 			 
 			float score = objects[i].prob;
-			cout << "prob: " << score << endl;
 
 			STrack strack(STrack::tlbr_to_tlwh(tlbr_), score);
 			if (score >= track_thresh)
