@@ -1,17 +1,18 @@
 #ifndef KALMANFILTER_H
 #define KALMANFILTER_H
 
-#include "datatype.h"
+#include "dataType.h"
 
-class KalmanFilter {
+class KalmanFilter
+{
 public:
     static const double chi2inv95[10];
     KalmanFilter();
     KAL_DATA initiate(const DETECTBOX& measurement);
     void predict(KAL_MEAN& mean, KAL_COVA& covariance);
     KAL_HDATA project(const KAL_MEAN& mean, const KAL_COVA& covariance);
-    KAL_DATA update(const KAL_MEAN& mean, 
-                    const KAL_COVA& covariance, 
+    KAL_DATA update(const KAL_MEAN& mean,
+                    const KAL_COVA& covariance,
                     const DETECTBOX& measurement);
 
     Eigen::Matrix<float, 1, -1> gating_distance(

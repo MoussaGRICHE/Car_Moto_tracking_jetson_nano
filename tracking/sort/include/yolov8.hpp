@@ -348,10 +348,11 @@ void YOLOv8::postprocess(std::vector<Object>& objs)
 		x1 = clamp(x1 * ratio, 0.f, width);
 		y1 = clamp(y1 * ratio, 0.f, height);
 		Object obj;
-		obj.rect.x = x0;
-		obj.rect.y = y0;
-		obj.rect.width = x1 - x0;
-		obj.rect.height = y1 - y0;
+		//obj.rect.x = x0;
+		//obj.rect.y = y0;
+		//obj.rect.width = x1 - x0;
+		//obj.rect.height = y1 - y0;
+		obj.rect = cv::Rect2f(x0, y0, x1 - x0, y1 - y0);
 		obj.prob = *(scores + i);
 		obj.label = *(labels + i);
 		objs.push_back(obj);
@@ -386,7 +387,7 @@ void YOLOv8::draw_objects(
 				text,
 				"%s, Id: %d", 
 				CLASS_NAMES[obj.label].c_str(),
-				obj.tracker_id
+				obj.id
 			);
             int baseLine = 0;
             cv::Size label_size = cv::getTextSize(
@@ -416,5 +417,4 @@ void YOLOv8::draw_objects(
         }
     }
 }
-
 #endif //JETSON_DETECT_YOLOV8_HPP

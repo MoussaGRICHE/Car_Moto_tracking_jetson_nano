@@ -25,26 +25,7 @@ linear_assignment::matching_cascade(
         std::vector<int> detection_indices)
 {
     TRACHER_MATCHD res;
-    // std::cout << "distance_metric" << distance_metric << std::endl;
-    // std::cout << "max_distance" << max_distance << std::endl;
-    // std::cout << "cascade_depth" << cascade_depth << std::endl;
-    // std::cout << "tracks [" << std::endl;
-    // for (auto i : tracks)
-    //     std::cout << i.hits << ", ";
-    // std::cout << "]" << endl;
-    // std::cout << "detections [" << std::endl;
-    // for (auto i : detections)
-    //     std::cout << i.confidence << ", ";
-    // std::cout << "]" << endl;
-    // std::cout << "track_indices [" << std::endl;
-    // for (auto i : track_indices)
-    //     std::cout << i << ", ";
-    // std::cout << "]" << endl;
-    // std::cout << "detection_indices [" << std::endl;
-    // for (auto i : detection_indices)
-    //     std::cout << i << ", ";
-    // std::cout << "]" << endl;
-    // !!!python diff: track_indices will never be None.
+    //!!!python diff: track_indices will never be None.
     //    if(track_indices.empty() == true) {
     //        for(size_t i = 0; i < tracks.size(); i++) {
     //            track_indices.push_back(i);
@@ -167,7 +148,6 @@ linear_assignment::gate_cost_matrix(
         const std::vector<int> &detection_indices,
         float gated_cost, bool only_position)
 {
-    // std::cout << "input cost matric" << cost_matrix << std::endl;
     int gating_dim = (only_position == true?2:4);
     double gating_threshold = KalmanFilter::chi2inv95[gating_dim];
     std::vector<DETECTBOX> measurements;
@@ -183,7 +163,6 @@ linear_assignment::gate_cost_matrix(
             if (gating_distance(0, j) > gating_threshold)  cost_matrix(i, j) = gated_cost;
         }
     }
-    // std::cout << "out cost matrix" << cost_matrix << std::endl;
     return cost_matrix;
 }
 

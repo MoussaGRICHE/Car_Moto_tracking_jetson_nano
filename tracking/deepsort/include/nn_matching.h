@@ -1,7 +1,7 @@
 #ifndef NN_MATCHING_H
 #define NN_MATCHING_H
 
-#include "datatype.h"
+#include "dataType.h"
 
 #include <map>
 

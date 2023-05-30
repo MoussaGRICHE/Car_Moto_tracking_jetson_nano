@@ -1,9 +1,7 @@
 #ifndef HUNGARIANOPER_H
 #define HUNGARIANOPER_H
-
 #include "munkres.h"
-#include "datatype.h"
-
+#include "dataType.h"
 
 class HungarianOper {
 public:

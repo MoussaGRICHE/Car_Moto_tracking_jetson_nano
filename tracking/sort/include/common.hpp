@@ -139,9 +139,10 @@ namespace det
 
 	struct Object
 	{
-		cv::Rect_<float> rect;
+		cv::Rect2f rect;
 		int label = 0;
 		float prob = 0.0;
+		int id;
 	};
 
 	struct PreParam

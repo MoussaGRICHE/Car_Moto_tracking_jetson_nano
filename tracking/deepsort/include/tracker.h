@@ -1,14 +1,11 @@
 #ifndef TRACKER_H
 #define TRACKER_H
-
-
 #include <vector>
+
 
 #include "kalmanfilter.h"
 #include "track.h"
-#include "model.hpp"
-
-using namespace std;
+#include "model.h"
 
 class NearNeighborDisMetric;
 
@@ -28,10 +25,9 @@ public:
     tracker(/*NearNeighborDisMetric* metric,*/
     		float max_cosine_distance, int nn_budget,
             float max_iou_distance = 0.7,
-            int max_age = 70, int n_init=3);
+            int max_age = 30, int n_init=3);
     void predict();
     void update(const DETECTIONS& detections);
-    void update(const DETECTIONSV2& detectionsv2);
     typedef DYNAMICM (tracker::* GATED_METRIC_FUNC)(
             std::vector<Track>& tracks,
             const DETECTIONS& dets,
@@ -40,7 +36,6 @@ public:
 private:    
     void _match(const DETECTIONS& detections, TRACHER_MATCHD& res);
     void _initiate_track(const DETECTION_ROW& detection);
-    void _initiate_track(const DETECTION_ROW& detection, CLSCONF clsConf);
 public:
     DYNAMICM gated_matric(
             std::vector<Track>& tracks,

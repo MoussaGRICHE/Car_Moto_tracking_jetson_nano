@@ -359,6 +359,7 @@ void YOLOv8::postprocess(std::vector<Object>& objs)
 		obj.rect.height = y1 - y0;
 		obj.prob = *(scores + i);
 		obj.label = *(labels + i);
+		std::cout << "rec: " << obj.rect << std::endl;
 		objs.push_back(obj);
 	}
 }
@@ -380,6 +381,10 @@ void YOLOv8::draw_objects(
                 COLORS[obj.label][1],
                 COLORS[obj.label][2]
             );
+			        // Print the rect and label
+       std::cout << "Rect: x=" << obj.rect.x << ", y=" << obj.rect.y << ", width=" << obj.rect.width << ", height=" << obj.rect.height << std::endl;
+        std::cout << "Label: " << obj.label << std::endl;
+		std::cout << "id: " << obj.tracker_id << std::endl;
             cv::rectangle(
                 res,
                 obj.rect,
