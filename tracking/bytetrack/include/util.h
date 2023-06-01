@@ -67,23 +67,21 @@ std::string gstreamer_pipeline (int capture_width, int capture_height, int displ
 }
 
 
-cv::Point crossingLine[2];
+cv::Point crossingLine[4];
 int clickCount = 0;
 
 
 void onMouse(int event, int x, int y, int flags, void* userdata) {
+    int count_line = *(static_cast<int*>(userdata));
     if (event == cv::EVENT_LBUTTONUP) {
-        if (clickCount == 0) {
-            crossingLine[0].x = x;
-            crossingLine[0].y = y;
-            std::cout << "First click: (" << crossingLine[0].x << ", " << crossingLine[0].y << ")\n";
-        } else if (clickCount == 1) {
-            crossingLine[1].x = x;
-            crossingLine[1].y = y;
-            std::cout << "Second click: (" << crossingLine[1].x << ", " << crossingLine[1].y << ")\n";
+        if (clickCount < count_line * 2) {
+            crossingLine[clickCount].x = x;
+            crossingLine[clickCount].y = y;
+            std::cout << "Click " << clickCount + 1 << ": (" << crossingLine[clickCount].x << ", " << crossingLine[clickCount].y << ")\n";
+            clickCount++;
         }
-        clickCount++;
     }
 }
+
 
 #endif // UTIL_H

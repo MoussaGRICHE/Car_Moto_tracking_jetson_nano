@@ -145,7 +145,7 @@ int main(int argc, char** argv) {
 
     // Create a window and set the mouse callback to get user input
     namedWindow("Get Crossing Line", WINDOW_NORMAL);
-    setMouseCallback("Get Crossing Line", onMouse);
+    setMouseCallback("Get Crossing Line", onMouse, &count_line);
 
     // Get the first frame and display it to get user input
     Mat frame;
@@ -153,11 +153,11 @@ int main(int argc, char** argv) {
     imshow("Get Crossing Line", frame);
 
     while (true) {
-        if (crossingLine[0].x != 0 && crossingLine[0].y != 0 && crossingLine[1].x != 0 && crossingLine[1].y != 0)
-            break;
-        if (waitKey(10) == 27) // Wait for the Escape key (ASCII value 27) to be pressed
-            break;
-    }
+    if (clickCount == count_line * 2)
+        break;
+    if (waitKey(10) == 27) // Wait for the Escape key (ASCII value 27) to be pressed
+        break;
+}
 
     // Destroy the window after getting user input
     destroyWindow("Get Crossing Line");
@@ -198,7 +198,14 @@ int main(int argc, char** argv) {
 
             // Draw the line
             Scalar lineColor = blnAtLeastOneObjCrossedTheLine ? Scalar(0.0, 200.0, 0.0) : Scalar(0.0, 0.0, 255.0);
-            line(image, crossingLine[0], crossingLine[1], lineColor, 2);
+            if (count_line==1){
+                line(image, crossingLine[0], crossingLine[1], lineColor, 2);
+            }
+            if (count_line==2){
+                line(image, crossingLine[0], crossingLine[1], lineColor, 2);
+                line(image, crossingLine[2], crossingLine[3], lineColor, 2);
+            }
+            
 
             // Draw bounding boxes, labels, tracker_id, and counting results on the image
             yolov8->draw_objects(image, res, track_objs, CLASS_NAMES, COLORS, DISPALYED_CLASS_NAMES, classCounts);
