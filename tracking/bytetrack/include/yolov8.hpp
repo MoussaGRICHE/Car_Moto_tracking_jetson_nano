@@ -29,14 +29,26 @@ public:
 	);
 	void infer();
 	void postprocess(std::vector<Object>& objs);
+	
+	bool checkIfObjsCrossedTheLine(
+		const std::vector<Object>& objs,
+		int& intHorizontalLinePosition,
+		const std::vector<std::string>& DISPLAYED_CLASS_NAMES,
+		const std::vector<std::string>& CLASS_NAMES,
+		std::map<std::string, int>& classCounts
+		);
+
 	static void draw_objects(
 		const cv::Mat& image,
 		cv::Mat& res,
 		const std::vector<Object>& objs,
 		const std::vector<std::string>& CLASS_NAMES,
 		const std::vector<std::vector<unsigned int>>& COLORS,
-		const std::vector<std::string>& DISPLAYED_CLASS_NAMES
+		const std::vector<std::string>& DISPLAYED_CLASS_NAMES,
+		std::map<std::string, int>& classCounts
 	);
+
+
 	int num_bindings;
 	int num_inputs = 0;
 	int num_outputs = 0;
@@ -44,6 +56,10 @@ public:
 	std::vector<Binding> output_bindings;
 	std::vector<void*> host_ptrs;
 	std::vector<void*> device_ptrs;
+	std::map<std::string, int> classCounts;
+	std::string className;
+	std::set<int> crossedTrackerIds;
+
 
 	PreParam pparam;
 private:
@@ -359,9 +375,35 @@ void YOLOv8::postprocess(std::vector<Object>& objs)
 		obj.rect.height = y1 - y0;
 		obj.prob = *(scores + i);
 		obj.label = *(labels + i);
-		std::cout << "rec: " << obj.rect << std::endl;
 		objs.push_back(obj);
 	}
+}
+
+
+
+bool checkIfObjsCrossedTheLine(
+	const std::vector<Object>& objs, 
+	const cv::Point* line, 
+	const std::vector<std::string>& CLASS_NAMES,
+    const std::vector<std::string>& DISPLAYED_CLASS_NAMES,
+	std::map<std::string, int>& classCounts, 
+	std::vector<int>& crossedTrackerIds
+	) 
+	{
+    bool atLeastOneObjCrossedTheLine = false;
+   
+	for (auto& obj : objs) {
+        if (std::find(DISPLAYED_CLASS_NAMES.begin(), DISPLAYED_CLASS_NAMES.end(), CLASS_NAMES[obj.label]) != DISPLAYED_CLASS_NAMES.end()) {
+			cv::Point center(obj.rect.x + obj.rect.width / 2, obj.rect.y + obj.rect.height / 2);
+                if (center.y >= (line[0].y + line[1].y)/2 && center.x >= line[0].x && center.x <= line[1].x && std::find(crossedTrackerIds.begin(), crossedTrackerIds.end(), obj.tracker_id) == crossedTrackerIds.end()) {
+                    classCounts[CLASS_NAMES[obj.label]]++;
+                    atLeastOneObjCrossedTheLine = true;
+                    crossedTrackerIds.push_back(obj.tracker_id);
+                }
+            
+        }
+    }
+    return atLeastOneObjCrossedTheLine;
 }
 
 void YOLOv8::draw_objects(
@@ -370,10 +412,13 @@ void YOLOv8::draw_objects(
     const std::vector<Object>& objs,
     const std::vector<std::string>& CLASS_NAMES,
     const std::vector<std::vector<unsigned int>>& COLORS,
-    const std::vector<std::string>& DISPLAYED_CLASS_NAMES
+    const std::vector<std::string>& DISPLAYED_CLASS_NAMES,
+	std::map<std::string, int>& classCounts
 )
 {
     res = image.clone();
+    int yPos = 60;
+
     for (auto& obj : objs) {
         if (std::find(DISPLAYED_CLASS_NAMES.begin(), DISPLAYED_CLASS_NAMES.end(), CLASS_NAMES[obj.label]) != DISPLAYED_CLASS_NAMES.end()) {
             cv::Scalar color = cv::Scalar(
@@ -381,10 +426,6 @@ void YOLOv8::draw_objects(
                 COLORS[obj.label][1],
                 COLORS[obj.label][2]
             );
-			        // Print the rect and label
-       std::cout << "Rect: x=" << obj.rect.x << ", y=" << obj.rect.y << ", width=" << obj.rect.width << ", height=" << obj.rect.height << std::endl;
-        std::cout << "Label: " << obj.label << std::endl;
-		std::cout << "id: " << obj.tracker_id << std::endl;
             cv::rectangle(
                 res,
                 obj.rect,
@@ -393,11 +434,11 @@ void YOLOv8::draw_objects(
             );
             char text[256];
             sprintf(
-				text,
-				"%s, Id: %d", 
-				CLASS_NAMES[obj.label].c_str(),
-				obj.tracker_id
-			);
+                text,
+                "%s, Id: %d",
+                CLASS_NAMES[obj.label].c_str(),
+                obj.tracker_id
+            );
             int baseLine = 0;
             cv::Size label_size = cv::getTextSize(
                 text,
@@ -423,8 +464,14 @@ void YOLOv8::draw_objects(
                 { 255, 255, 255 },
                 1
             );
+
         }
     }
+	// Counting results display
+	for (const auto& className : DISPLAYED_CLASS_NAMES) {
+		putText(res, className + ": " + std::to_string(classCounts[className]), Point(0, yPos), 0, 0.6, Scalar(0, 0, 255), 2, LINE_AA);
+		yPos += 30;
+	}
 }
 
 #endif //JETSON_DETECT_YOLOV8_HPP

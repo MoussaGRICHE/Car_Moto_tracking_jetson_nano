@@ -10,9 +10,18 @@ Eigen::Matrix<float, -1, 2, Eigen::RowMajor> HungarianOper::Solve(const DYNAMICM
             matrix(row, col) = cost_matrix(row, col);
         }
     }
+
+    // Debug print
+    std::cout << "Cost matrix before solving: " << std::endl;
+    std::cout << matrix << std::endl;
+
     //Munkres get matrix;
     Munkres<double> m;
     m.solve(matrix);
+
+    // Debug print
+    std::cout << "Cost matrix after solving: " << std::endl;
+    std::cout << matrix << std::endl;
 
     //
     std::vector<std::pair<int, int>> pairs;
