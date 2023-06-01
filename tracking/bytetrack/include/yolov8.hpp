@@ -35,7 +35,8 @@ public:
 		int& intHorizontalLinePosition,
 		const std::vector<std::string>& DISPLAYED_CLASS_NAMES,
 		const std::vector<std::string>& CLASS_NAMES,
-		std::map<std::string, int>& classCounts
+		std::map<std::string, int>& classCounts,
+		int count_line
 		);
 
 	static void draw_objects(
@@ -387,22 +388,46 @@ bool checkIfObjsCrossedTheLine(
 	const std::vector<std::string>& CLASS_NAMES,
     const std::vector<std::string>& DISPLAYED_CLASS_NAMES,
 	std::map<std::string, int>& classCounts, 
-	std::vector<int>& crossedTrackerIds
+	std::vector<int>& crossedTrackerIds,
+	int count_line
 	) 
 	{
     bool atLeastOneObjCrossedTheLine = false;
-   
-	for (auto& obj : objs) {
-        if (std::find(DISPLAYED_CLASS_NAMES.begin(), DISPLAYED_CLASS_NAMES.end(), CLASS_NAMES[obj.label]) != DISPLAYED_CLASS_NAMES.end()) {
-			cv::Point center(obj.rect.x + obj.rect.width / 2, obj.rect.y + obj.rect.height / 2);
-                if (center.y >= (line[0].y + line[1].y)/2 && center.x >= line[0].x && center.x <= line[1].x && std::find(crossedTrackerIds.begin(), crossedTrackerIds.end(), obj.tracker_id) == crossedTrackerIds.end()) {
-                    classCounts[CLASS_NAMES[obj.label]]++;
-                    atLeastOneObjCrossedTheLine = true;
-                    crossedTrackerIds.push_back(obj.tracker_id);
-                }
-            
-        }
-    }
+    if (count_line==1){
+		for (auto& obj : objs) {
+			if (std::find(DISPLAYED_CLASS_NAMES.begin(), DISPLAYED_CLASS_NAMES.end(), CLASS_NAMES[obj.label]) != DISPLAYED_CLASS_NAMES.end()) {
+				cv::Point center(obj.rect.x + obj.rect.width / 2, obj.rect.y + obj.rect.height / 2);
+					if (center.y >= (line[0].y + line[1].y)/2 && center.x >= line[0].x && center.x <= line[1].x && std::find(crossedTrackerIds.begin(), crossedTrackerIds.end(), obj.tracker_id) == crossedTrackerIds.end()) {
+						classCounts[CLASS_NAMES[obj.label]]++;
+						atLeastOneObjCrossedTheLine = true;
+						crossedTrackerIds.push_back(obj.tracker_id);
+					}
+				
+			}
+		}
+	}
+	
+	if (count_line==2){
+		for (auto& obj : objs) {
+			if (std::find(DISPLAYED_CLASS_NAMES.begin(), DISPLAYED_CLASS_NAMES.end(), CLASS_NAMES[obj.label]) != DISPLAYED_CLASS_NAMES.end()) {
+				cv::Point center(obj.rect.x + obj.rect.width / 2, obj.rect.y + obj.rect.height / 2);
+
+					if (center.y >= (line[0].y + line[1].y)/2 && center.x >= line[0].x && center.x <= line[1].x && std::find(crossedTrackerIds.begin(), crossedTrackerIds.end(), obj.tracker_id) == crossedTrackerIds.end()) {
+						classCounts[CLASS_NAMES[obj.label]]++;
+						atLeastOneObjCrossedTheLine = true;
+						crossedTrackerIds.push_back(obj.tracker_id);
+					}
+
+					if (center.y <= (line[2].y + line[3].y)/2 && center.x >= line[2].x && center.x <= line[3].x && std::find(crossedTrackerIds.begin(), crossedTrackerIds.end(), obj.tracker_id) == crossedTrackerIds.end()) {
+						classCounts[CLASS_NAMES[obj.label]]++;
+						atLeastOneObjCrossedTheLine = true;
+						crossedTrackerIds.push_back(obj.tracker_id);
+					}
+				
+			}
+		}
+	}
+
     return atLeastOneObjCrossedTheLine;
 }
 

@@ -194,7 +194,14 @@ int main(int argc, char** argv) {
             }
 
             // Check the line
-            bool blnAtLeastOneObjCrossedTheLine = checkIfObjsCrossedTheLine(track_objs, crossingLine, DISPALYED_CLASS_NAMES, CLASS_NAMES, classCounts, crossedTrackerIds);
+            bool blnAtLeastOneObjCrossedTheLine = checkIfObjsCrossedTheLine(
+                                                        track_objs, 
+                                                        crossingLine, 
+                                                        DISPALYED_CLASS_NAMES, 
+                                                        CLASS_NAMES, 
+                                                        classCounts, 
+                                                        crossedTrackerIds,
+                                                        count_line);
 
             // Draw the line
             Scalar lineColor = blnAtLeastOneObjCrossedTheLine ? Scalar(0.0, 200.0, 0.0) : Scalar(0.0, 0.0, 255.0);
