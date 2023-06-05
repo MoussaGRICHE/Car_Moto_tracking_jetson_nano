@@ -498,23 +498,39 @@ void YOLOv8::draw_objects(
 
         }
     }
+
 	// Counting results display
-	if (count_line==1){
-		for (const auto& className : DISPLAYED_CLASS_NAMES) {
-			putText(res, className + ": " + std::to_string(classCounts_IN[className]), Point(0, yPos), 0, 0.6, Scalar(0, 0, 255), 2, LINE_AA);
-			yPos += 30;
-		}
+	int cadreWidth = 200;
+	int cadreHeight = DISPLAYED_CLASS_NAMES.size() * 30 + 20;
+	int xPos = 10; 
+	int cadreYPos = 10; 
+
+	rectangle(res, Point(xPos, cadreYPos), Point(xPos + cadreWidth, cadreYPos + cadreHeight), Scalar(0, 0, 255), -1); // Draw the cadre
+
+	int textYPos = cadreYPos + 30; 
+
+	for (const auto& className : DISPLAYED_CLASS_NAMES) {
+		putText(res, className + ": " + std::to_string(classCounts_IN[className]), Point(xPos + 10, textYPos), FONT_HERSHEY_SIMPLEX, 0.6, Scalar(255, 255, 255), 2, LINE_AA);
+		textYPos += 30;
 	}
 
 	if (count_line == 2) {
-    int xPos = res.cols - 200; // Adjust the x-coordinate based on the image size and desired position
+		xPos = res.cols - cadreWidth - 10; 
+		rectangle(res, Point(xPos, cadreYPos), Point(xPos + cadreWidth, cadreYPos + cadreHeight), Scalar(0, 255, 0), -1); // Draw the second cadre
 
-    for (const auto& className : DISPLAYED_CLASS_NAMES) {
-        putText(res, className + ": " + std::to_string(classCounts_IN[className]), Point(0, yPos), 0, 0.6, Scalar(0, 0, 255), 2, LINE_AA);
-        putText(res, className + ": " + std::to_string(classCounts_OUT[className]), Point(xPos, yPos), 0, 0.6, Scalar(0, 255, 0), 2, LINE_AA);
-        yPos += 30;
-    }
+		textYPos = cadreYPos + 30; 
+
+		for (const auto& className : DISPLAYED_CLASS_NAMES) {
+			putText(res, className + ": " + std::to_string(classCounts_OUT[className]), Point(xPos + 10, textYPos), FONT_HERSHEY_SIMPLEX, 0.6, Scalar(255, 255, 255), 2, LINE_AA);
+			textYPos += 30;
+		}
+	}
+
+
+
+
+
 }
-}
+
 
 #endif //JETSON_DETECT_YOLOV8_HPP
