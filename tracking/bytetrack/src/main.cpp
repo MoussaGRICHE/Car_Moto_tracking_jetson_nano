@@ -35,7 +35,8 @@ int main(int argc, char** argv) {
     int frame_count = 0;
     int infer_frame_count = 0;
     int total_ms = 0;
-    map<string, int> classCounts;
+    map<string, int> classCounts_IN;
+    map<string, int> classCounts_OUT;
 
     vector<int> crossedTrackerIds;
 
@@ -163,7 +164,8 @@ int main(int argc, char** argv) {
     destroyWindow("Get Crossing Line");
 
     for (const auto& className : DISPALYED_CLASS_NAMES) {
-        classCounts[className] = 0;
+        classCounts_IN[className] = 0;
+        classCounts_OUT[className] = 0;
     }
 
     // Main loop for processing video frames
@@ -199,7 +201,8 @@ int main(int argc, char** argv) {
                                                         crossingLine, 
                                                         DISPALYED_CLASS_NAMES, 
                                                         CLASS_NAMES, 
-                                                        classCounts, 
+                                                        classCounts_IN, 
+                                                        classCounts_OUT, 
                                                         crossedTrackerIds,
                                                         count_line);
 
@@ -215,7 +218,7 @@ int main(int argc, char** argv) {
             
 
             // Draw bounding boxes, labels, tracker_id, and counting results on the image
-            yolov8->draw_objects(image, res, track_objs, CLASS_NAMES, COLORS, DISPALYED_CLASS_NAMES, classCounts);
+            yolov8->draw_objects(image, res, track_objs, CLASS_NAMES, COLORS, DISPALYED_CLASS_NAMES, classCounts_IN, classCounts_OUT, count_line);
 
             auto end = chrono::system_clock::now();
             double tc = chrono::duration_cast<chrono::microseconds>(end - start).count() / 1000.0;

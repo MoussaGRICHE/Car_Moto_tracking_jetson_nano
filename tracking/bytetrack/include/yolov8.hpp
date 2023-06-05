@@ -35,7 +35,8 @@ public:
 		int& intHorizontalLinePosition,
 		const std::vector<std::string>& DISPLAYED_CLASS_NAMES,
 		const std::vector<std::string>& CLASS_NAMES,
-		std::map<std::string, int>& classCounts,
+		std::map<std::string, int>& classCounts_IN, 
+		std::map<std::string, int>& classCounts_OUT,
 		int count_line
 		);
 
@@ -46,7 +47,9 @@ public:
 		const std::vector<std::string>& CLASS_NAMES,
 		const std::vector<std::vector<unsigned int>>& COLORS,
 		const std::vector<std::string>& DISPLAYED_CLASS_NAMES,
-		std::map<std::string, int>& classCounts
+		std::map<std::string, int>& classCounts_IN, 
+		std::map<std::string, int>& classCounts_OUT,
+		int count_line
 	);
 
 
@@ -387,7 +390,8 @@ bool checkIfObjsCrossedTheLine(
 	const cv::Point* line, 
 	const std::vector<std::string>& CLASS_NAMES,
     const std::vector<std::string>& DISPLAYED_CLASS_NAMES,
-	std::map<std::string, int>& classCounts, 
+	std::map<std::string, int>& classCounts_IN, 
+	std::map<std::string, int>& classCounts_OUT, 
 	std::vector<int>& crossedTrackerIds,
 	int count_line
 	) 
@@ -398,7 +402,7 @@ bool checkIfObjsCrossedTheLine(
 			if (std::find(DISPLAYED_CLASS_NAMES.begin(), DISPLAYED_CLASS_NAMES.end(), CLASS_NAMES[obj.label]) != DISPLAYED_CLASS_NAMES.end()) {
 				cv::Point center(obj.rect.x + obj.rect.width / 2, obj.rect.y + obj.rect.height / 2);
 					if (center.y >= (line[0].y + line[1].y)/2 && center.x >= line[0].x && center.x <= line[1].x && std::find(crossedTrackerIds.begin(), crossedTrackerIds.end(), obj.tracker_id) == crossedTrackerIds.end()) {
-						classCounts[CLASS_NAMES[obj.label]]++;
+						classCounts_IN[CLASS_NAMES[obj.label]]++;
 						atLeastOneObjCrossedTheLine = true;
 						crossedTrackerIds.push_back(obj.tracker_id);
 					}
@@ -413,13 +417,13 @@ bool checkIfObjsCrossedTheLine(
 				cv::Point center(obj.rect.x + obj.rect.width / 2, obj.rect.y + obj.rect.height / 2);
 
 					if (center.y >= (line[0].y + line[1].y)/2 && center.x >= line[0].x && center.x <= line[1].x && std::find(crossedTrackerIds.begin(), crossedTrackerIds.end(), obj.tracker_id) == crossedTrackerIds.end()) {
-						classCounts[CLASS_NAMES[obj.label]]++;
+						classCounts_IN[CLASS_NAMES[obj.label]]++;
 						atLeastOneObjCrossedTheLine = true;
 						crossedTrackerIds.push_back(obj.tracker_id);
 					}
 
 					if (center.y <= (line[2].y + line[3].y)/2 && center.x >= line[2].x && center.x <= line[3].x && std::find(crossedTrackerIds.begin(), crossedTrackerIds.end(), obj.tracker_id) == crossedTrackerIds.end()) {
-						classCounts[CLASS_NAMES[obj.label]]++;
+						classCounts_OUT[CLASS_NAMES[obj.label]]++;
 						atLeastOneObjCrossedTheLine = true;
 						crossedTrackerIds.push_back(obj.tracker_id);
 					}
@@ -438,7 +442,9 @@ void YOLOv8::draw_objects(
     const std::vector<std::string>& CLASS_NAMES,
     const std::vector<std::vector<unsigned int>>& COLORS,
     const std::vector<std::string>& DISPLAYED_CLASS_NAMES,
-	std::map<std::string, int>& classCounts
+	std::map<std::string, int>& classCounts_IN, 
+	std::map<std::string, int>& classCounts_OUT,
+	int count_line
 )
 {
     res = image.clone();
@@ -493,10 +499,22 @@ void YOLOv8::draw_objects(
         }
     }
 	// Counting results display
-	for (const auto& className : DISPLAYED_CLASS_NAMES) {
-		putText(res, className + ": " + std::to_string(classCounts[className]), Point(0, yPos), 0, 0.6, Scalar(0, 0, 255), 2, LINE_AA);
-		yPos += 30;
+	if (count_line==1){
+		for (const auto& className : DISPLAYED_CLASS_NAMES) {
+			putText(res, className + ": " + std::to_string(classCounts_IN[className]), Point(0, yPos), 0, 0.6, Scalar(0, 0, 255), 2, LINE_AA);
+			yPos += 30;
+		}
 	}
+
+	if (count_line == 2) {
+    int xPos = res.cols - 200; // Adjust the x-coordinate based on the image size and desired position
+
+    for (const auto& className : DISPLAYED_CLASS_NAMES) {
+        putText(res, className + ": " + std::to_string(classCounts_IN[className]), Point(0, yPos), 0, 0.6, Scalar(0, 0, 255), 2, LINE_AA);
+        putText(res, className + ": " + std::to_string(classCounts_OUT[className]), Point(xPos, yPos), 0, 0.6, Scalar(0, 255, 0), 2, LINE_AA);
+        yPos += 30;
+    }
+}
 }
 
 #endif //JETSON_DETECT_YOLOV8_HPP
