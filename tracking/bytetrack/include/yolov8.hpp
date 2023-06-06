@@ -12,8 +12,6 @@
 using namespace det;
 
 
-
-
 class YOLOv8
 {
 public:
@@ -533,7 +531,5 @@ void YOLOv8::draw_objects(
     cv::putText(res, fpsText, cv::Point(textX, textY), fontFace, fontScale, cv::Scalar(255, 255, 255), thickness, cv::LINE_AA);
 
 }
-
-
 
 #endif //JETSON_DETECT_YOLOV8_HPP
