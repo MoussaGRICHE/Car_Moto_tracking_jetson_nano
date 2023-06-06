@@ -216,7 +216,6 @@ int main(int argc, char** argv) {
                 line(image, crossingLine[0], crossingLine[1], lineColor, 2);
                 line(image, crossingLine[2], crossingLine[3], lineColor, 2);
             }
-            
 
             // Draw bounding boxes, labels, tracker_id, and counting results on the image
             yolov8->draw_objects(image, res, track_objs, CLASS_NAMES, COLORS, DISPALYED_CLASS_NAMES, classCounts_IN, classCounts_OUT, count_line);
