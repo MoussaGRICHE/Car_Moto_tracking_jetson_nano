@@ -153,5 +153,18 @@ std::list<double> calculateAngles(const cv::Point* crossingLine, int count_line)
     return angles;
 }
 
+bool hasPassedLine(const cv::Point& lineStart, const cv::Point& lineEnd, const cv::Point& point)
+{
+    cv::Point lineVec(lineEnd.x - lineStart.x, lineEnd.y - lineStart.y);
+    cv::Point pointVec(point.x - lineStart.x, point.y - lineStart.y);
+
+    int crossProduct = lineVec.x * pointVec.y - lineVec.y * pointVec.x;
+
+    // If the cross product is positive and the point is within the line segment, it has passed the line
+    return crossProduct > 0 && point.x >= std::min(lineStart.x, lineEnd.x) && point.x <= std::max(lineStart.x, lineEnd.x) && point.y >= std::min(lineStart.y, lineEnd.y) && point.y <= std::max(lineStart.y, lineEnd.y);
+}
+
+
+
 
 #endif // UTIL_H

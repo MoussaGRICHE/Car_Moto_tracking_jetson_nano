@@ -8,6 +8,7 @@
 #include "NvInferPlugin.h"
 #include "BYTETracker.h"
 #include "logging.h"
+#include "util.h"
 using namespace det;
 
 
@@ -37,8 +38,7 @@ public:
 		const std::vector<std::string>& CLASS_NAMES,
 		std::map<std::string, int>& classCounts_IN, 
 		std::map<std::string, int>& classCounts_OUT,
-		int count_line,
-		std::list<double> angles
+		int count_line
 		);
 
 	static void draw_objects(
@@ -385,7 +385,6 @@ void YOLOv8::postprocess(std::vector<Object>& objs)
 }
 
 
-
 bool checkIfObjsCrossedTheLine(
     const std::vector<Object>& objs, 
     const cv::Point* line,
@@ -394,94 +393,33 @@ bool checkIfObjsCrossedTheLine(
     std::map<std::string, int>& classCounts_IN, 
     std::map<std::string, int>& classCounts_OUT, 
     std::vector<int>& crossedTrackerIds,
-    int count_line, 
-	std::list<double> angles
+    int count_line
 ) {
     bool atLeastOneObjCrossedTheLine = false;
-
-	std::cout << "Angle 1: " << angles.front() << " degrees" << std::endl;
-    angles.pop_front();
-    std::cout << "Angle 2: " << angles.front() << " degrees" << std::endl;
 
     for (auto& obj : objs) {
         if (std::find(DISPLAYED_CLASS_NAMES.begin(), DISPLAYED_CLASS_NAMES.end(), CLASS_NAMES[obj.label]) != DISPLAYED_CLASS_NAMES.end()) {
             cv::Point center(obj.rect.x + obj.rect.width / 2, obj.rect.y + obj.rect.height / 2);
 
             // Check if the object crosses the first line based on the calculated slope1
-			if ((angles.front()<= 110 && angles.front() >= 70) || (angles.front() <= 290 && angles.front() >= 250)){
-					if (center.x >= (line[0].x + line[1].x)/2 && center.y >= line[0].y && center.y <= line[1].y && std::find(crossedTrackerIds.begin(), crossedTrackerIds.end(), obj.tracker_id) == crossedTrackerIds.end()) {
-					classCounts_IN[CLASS_NAMES[obj.label]]++;
+			if (hasPassedLine(line[0], line[1], center) && std::find(crossedTrackerIds.begin(), crossedTrackerIds.end(), obj.tracker_id) == crossedTrackerIds.end()) {
+				classCounts_IN[CLASS_NAMES[obj.label]]++;
+				atLeastOneObjCrossedTheLine = true;
+				crossedTrackerIds.push_back(obj.tracker_id);
+			}
+			if (count_line == 2) {
+				// Check if the object crosses the first line based on the calculated slope1
+				if (hasPassedLine(line[2], line[3], center) && std::find(crossedTrackerIds.begin(), crossedTrackerIds.end(), obj.tracker_id) == crossedTrackerIds.end()) {
+					classCounts_OUT[CLASS_NAMES[obj.label]]++;
 					atLeastOneObjCrossedTheLine = true;
 					crossedTrackerIds.push_back(obj.tracker_id);
 				}
 			}
-            
-			if ((angles.front() <= 200 && angles.front() >= 160) || (angles.front()<= 20 && angles.front()>= 340)){
-					if (center.y >= (line[0].y + line[1].y)/2 && center.x >= line[0].x && center.x <= line[1].x && std::find(crossedTrackerIds.begin(), crossedTrackerIds.end(), obj.tracker_id) == crossedTrackerIds.end()) {
-					classCounts_IN[CLASS_NAMES[obj.label]]++;
-					atLeastOneObjCrossedTheLine = true;
-					crossedTrackerIds.push_back(obj.tracker_id);
-				}
-			}
-
-			if ((angles.front() > 110 && angles.front() < 160) || (angles.front() > 290 && angles.front() < 340)){
-					if (center.y >= (line[0].y + line[1].y)/2 && center.x >= line[0].x && center.x <= line[1].x && std::find(crossedTrackerIds.begin(), crossedTrackerIds.end(), obj.tracker_id) == crossedTrackerIds.end()) {
-					classCounts_IN[CLASS_NAMES[obj.label]]++;
-					atLeastOneObjCrossedTheLine = true;
-					crossedTrackerIds.push_back(obj.tracker_id);
-				}
-			}
-
-			if ((angles.front() > 20 && angles.front() < 70) || (angles.front()> 200 && angles.front() < 250)){
-					if (center.y >= (line[0].y + line[1].y)/2 && center.x >= line[0].x && center.x <= line[1].x && std::find(crossedTrackerIds.begin(), crossedTrackerIds.end(), obj.tracker_id) == crossedTrackerIds.end()) {
-					classCounts_IN[CLASS_NAMES[obj.label]]++;
-					atLeastOneObjCrossedTheLine = true;
-					crossedTrackerIds.push_back(obj.tracker_id);
-				}
-			}
-
-            if (count_line == 2) {
-				angles.pop_front();
-
-                // Check if the object crosses the second line based on the calculated slope2
-					if ((angles.front()<= 110 && angles.front() >= 70) || (angles.front() <= 290 && angles.front() >= 250)){
-						if (center.x <= (line[2].x + line[3].x)/2 && center.y >= line[2].y && center.y <= line[3].y && std::find(crossedTrackerIds.begin(), crossedTrackerIds.end(), obj.tracker_id) == crossedTrackerIds.end()) {
-						classCounts_OUT[CLASS_NAMES[obj.label]]++;
-						atLeastOneObjCrossedTheLine = true;
-						crossedTrackerIds.push_back(obj.tracker_id);
-					}
-				}
-				
-				if ((angles.front() <= 200 && angles.front() >= 160) || (angles.front()<= 20 && angles.front()>= 340)){
-						if (center.y <= (line[2].y + line[3].y)/2 && center.x >= line[2].x && center.x <= line[3].x && std::find(crossedTrackerIds.begin(), crossedTrackerIds.end(), obj.tracker_id) == crossedTrackerIds.end()) {
-						classCounts_OUT[CLASS_NAMES[obj.label]]++;
-						atLeastOneObjCrossedTheLine = true;
-						crossedTrackerIds.push_back(obj.tracker_id);
-					}
-				}
-
-				if ((angles.front() > 110 && angles.front() < 160) || (angles.front() > 290 && angles.front() < 340)){
-						if (center.y <= (line[2].y + line[3].y)/2 && center.x >= line[2].x && center.x <= line[3].x && std::find(crossedTrackerIds.begin(), crossedTrackerIds.end(), obj.tracker_id) == crossedTrackerIds.end()) {
-						classCounts_OUT[CLASS_NAMES[obj.label]]++;
-						atLeastOneObjCrossedTheLine = true;
-						crossedTrackerIds.push_back(obj.tracker_id);
-					}
-				}
-
-				if ((angles.front() > 20 && angles.front() < 70) || (angles.front()> 200 && angles.front() < 250)){
-						if (center.y <= (line[2].y + line[3].y)/2 && center.x >= line[2].x && center.x <= line[3].x && std::find(crossedTrackerIds.begin(), crossedTrackerIds.end(), obj.tracker_id) == crossedTrackerIds.end()) {
-						classCounts_OUT[CLASS_NAMES[obj.label]]++;
-						atLeastOneObjCrossedTheLine = true;
-						crossedTrackerIds.push_back(obj.tracker_id);
-					}
-				}
-								
-			}
-        }
-    }
-
-    return atLeastOneObjCrossedTheLine;
+		}	
+	}
+	return atLeastOneObjCrossedTheLine;
 }
+
 
 void YOLOv8::draw_objects(
     const cv::Mat& image,

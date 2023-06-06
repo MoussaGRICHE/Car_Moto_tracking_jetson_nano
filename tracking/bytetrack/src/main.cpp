@@ -159,14 +159,6 @@ int main(int argc, char** argv) {
         if (waitKey(10) == 27) // Wait for the Escape key (ASCII value 27) to be pressed
             break;
     }
-
-    // Calculate the slopes of the lines
-    std::list<double> angles = calculateAngles(crossingLine, count_line);
-
-    std::cout << "Angle 1: " << angles.front() << " degrees" << std::endl;
-    angles.pop_front();
-    std::cout << "Angle 2: " << angles.front() << " degrees" << std::endl;
-
     
 
     // Destroy the window after getting user input
@@ -213,8 +205,7 @@ int main(int argc, char** argv) {
                                                         classCounts_IN, 
                                                         classCounts_OUT, 
                                                         crossedTrackerIds,
-                                                        count_line,
-                                                        angles);
+                                                        count_line);
 
             // Draw the line
             Scalar lineColor = blnAtLeastOneObjCrossedTheLine ? Scalar(0.0, 200.0, 0.0) : Scalar(0.0, 0.0, 255.0);
