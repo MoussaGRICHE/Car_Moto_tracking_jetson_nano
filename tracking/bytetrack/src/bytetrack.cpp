@@ -388,7 +388,7 @@ void doInference(IExecutionContext& context, float* input, float* output, const 
     CHECK(cudaFree(buffers[outputIndex]));
 }
 
-int main(int argc, char** argv) {
+int main_function(int argc, char** argv) {
     cudaSetDevice(DEVICE);
     
     // create a model using the API directly and serialize it to a stream
