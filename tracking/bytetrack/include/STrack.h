@@ -32,6 +32,7 @@ public:
 public:
 	bool is_activated;
 	int track_id;
+	int label;
 	int state;
 
 	vector<float> _tlwh;

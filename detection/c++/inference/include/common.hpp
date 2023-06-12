@@ -1,9 +1,9 @@
 //
-// Created by ubuntu on 3/16/23.
+// Created by ubuntu on 1/24/23.
 //
 
-#ifndef JETSON_DETECT_COMMON_HPP
-#define JETSON_DETECT_COMMON_HPP
+#ifndef DETECT_NORMAL_COMMON_HPP
+#define DETECT_NORMAL_COMMON_HPP
 #include "opencv2/opencv.hpp"
 #include <sys/stat.h>
 #include <unistd.h>
@@ -153,4 +153,4 @@ namespace det
 		float width = 0;
 	};
 }
-#endif //JETSON_DETECT_COMMON_HPP
+#endif //DETECT_NORMAL_COMMON_HPP

@@ -1,16 +1,17 @@
 //
-// Created by ubuntu on 3/16/23.
+// Created by ubuntu on 1/20/23.
 //
 #ifndef JETSON_DETECT_YOLOV8_HPP
 #define JETSON_DETECT_YOLOV8_HPP
+
 #include "fstream"
 #include "common.hpp"
 #include "NvInferPlugin.h"
 #include "BYTETracker.h"
 #include "logging.h"
 #include "util.h"
-using namespace det;
 
+using namespace det;
 
 class YOLOv8
 {
@@ -28,31 +29,17 @@ public:
 	);
 	void infer();
 	void postprocess(std::vector<Object>& objs);
-	
-	bool checkIfObjsCrossedTheLine(
-		const std::vector<Object>& objs,
-		int& intHorizontalLinePosition,
-		const std::vector<std::string>& DISPLAYED_CLASS_NAMES,
-		const std::vector<std::string>& CLASS_NAMES,
-		std::map<std::string, int>& classCounts_IN, 
-		std::map<std::string, int>& classCounts_OUT,
-		int count_line
-		);
-
 	static void draw_objects(
 		const cv::Mat& image,
 		cv::Mat& res,
 		const std::vector<Object>& objs,
 		const std::vector<std::string>& CLASS_NAMES,
 		const std::vector<std::vector<unsigned int>>& COLORS,
-		const std::vector<std::string>& DISPLAYED_CLASS_NAMES,
-		std::map<std::string, int>& classCounts_IN, 
+		std::map<std::string, int>& classCounts_IN,
 		std::map<std::string, int>& classCounts_OUT,
 		int count_line,
 		double infer_fps
 	);
-
-
 	int num_bindings;
 	int num_inputs = 0;
 	int num_outputs = 0;
@@ -60,10 +47,6 @@ public:
 	std::vector<Binding> output_bindings;
 	std::vector<void*> host_ptrs;
 	std::vector<void*> device_ptrs;
-	std::map<std::string, int> classCounts;
-	std::string className;
-	std::set<int> crossedTrackerIds;
-
 
 	PreParam pparam;
 private:
@@ -71,7 +54,8 @@ private:
 	nvinfer1::IRuntime* runtime = nullptr;
 	nvinfer1::IExecutionContext* context = nullptr;
 	cudaStream_t stream = nullptr;
-	Logger gLogger{ nvinfer1::ILogger::Severity::kERROR };
+	det::Logger gLogger{ nvinfer1::ILogger::Severity::kERROR };
+
 
 };
 
@@ -92,7 +76,7 @@ YOLOv8::YOLOv8(const std::string& engine_file_path)
 
 	this->engine = this->runtime->deserializeCudaEngine(trtModelStream, size);
 	assert(this->engine != nullptr);
-
+	delete[] trtModelStream;
 	this->context = this->engine->createExecutionContext();
 
 	assert(this->context != nullptr);
@@ -158,9 +142,10 @@ void YOLOv8::make_pipe(bool warmup)
 	for (auto& bindings : this->input_bindings)
 	{
 		void* d_ptr;
-		CHECK(cudaMalloc(
+		CHECK(cudaMallocAsync(
 			&d_ptr,
-			bindings.size * bindings.dsize)
+			bindings.size * bindings.dsize,
+			this->stream)
 		);
 		this->device_ptrs.push_back(d_ptr);
 	}
@@ -169,9 +154,10 @@ void YOLOv8::make_pipe(bool warmup)
 	{
 		void* d_ptr, * h_ptr;
 		size_t size = bindings.size * bindings.dsize;
-		CHECK(cudaMalloc(
+		CHECK(cudaMallocAsync(
 			&d_ptr,
-			size)
+			size,
+			this->stream)
 		);
 		CHECK(cudaHostAlloc(
 			&h_ptr,
@@ -383,7 +369,6 @@ void YOLOv8::postprocess(std::vector<Object>& objs)
 	}
 }
 
-
 bool checkIfObjsCrossedTheLine(
     const std::vector<Object>& objs, 
     const cv::Point* line,
@@ -426,7 +411,6 @@ void YOLOv8::draw_objects(
     const std::vector<Object>& objs,
     const std::vector<std::string>& CLASS_NAMES,
     const std::vector<std::vector<unsigned int>>& COLORS,
-    const std::vector<std::string>& DISPLAYED_CLASS_NAMES,
 	std::map<std::string, int>& classCounts_IN, 
 	std::map<std::string, int>& classCounts_OUT,
 	int count_line,
@@ -436,58 +420,56 @@ void YOLOv8::draw_objects(
     res = image.clone();
     int yPos = 60;
 
-    for (auto& obj : objs) {
-        if (std::find(DISPLAYED_CLASS_NAMES.begin(), DISPLAYED_CLASS_NAMES.end(), CLASS_NAMES[obj.label]) != DISPLAYED_CLASS_NAMES.end()) {
-            cv::Scalar color = cv::Scalar(
-                COLORS[obj.label][0],
-                COLORS[obj.label][1],
-                COLORS[obj.label][2]
-            );
-            cv::rectangle(
-                res,
-                obj.rect,
-                color,
-                2
-            );
-            char text[256];
-            sprintf(
-                text,
-                "%s, Id: %d",
-                CLASS_NAMES[obj.label].c_str(),
-                obj.tracker_id
-            );
-            int baseLine = 0;
-            cv::Size label_size = cv::getTextSize(
-                text,
-                cv::FONT_HERSHEY_SIMPLEX,
-                0.4, 1,
-                &baseLine
-            );
-            int x = (int)obj.rect.x;
-            int y = (int)obj.rect.y + 1;
-            if (y > res.rows) y = res.rows;
-            cv::rectangle(
-                res,
-                cv::Rect(x, y, label_size.width, label_size.height + baseLine),
-                { 0, 0, 255 },
-                -1
-            );
-            cv::putText(
-                res,
-                text,
-                cv::Point(x, y + label_size.height),
-                cv::FONT_HERSHEY_SIMPLEX,
-                0.4,
-                { 255, 255, 255 },
-                1
-            );
-
-        }
+    for (auto& obj : objs) 
+	{
+		cv::Scalar color = cv::Scalar(
+			COLORS[obj.label][0],
+			COLORS[obj.label][1],
+			COLORS[obj.label][2]
+		);
+		cv::rectangle(
+			res,
+			obj.rect,
+			color,
+			2
+		);
+		char text[256];
+		sprintf(
+			text,
+			"%s, Id: %d",
+			CLASS_NAMES[obj.label].c_str(),
+			obj.tracker_id
+		);
+		int baseLine = 0;
+		cv::Size label_size = cv::getTextSize(
+			text,
+			cv::FONT_HERSHEY_SIMPLEX,
+			0.4, 1,
+			&baseLine
+		);
+		int x = (int)obj.rect.x;
+		int y = (int)obj.rect.y + 1;
+		if (y > res.rows) y = res.rows;
+		cv::rectangle(
+			res,
+			cv::Rect(x, y, label_size.width, label_size.height + baseLine),
+			{ 0, 0, 255 },
+			-1
+		);
+		cv::putText(
+			res,
+			text,
+			cv::Point(x, y + label_size.height),
+			cv::FONT_HERSHEY_SIMPLEX,
+			0.4,
+			{ 255, 255, 255 },
+			1
+		);
     }
 
 	// Counting results display
 	int cadreWidth = 200;
-	int cadreHeight = DISPLAYED_CLASS_NAMES.size() * 30 + 20;
+	int cadreHeight = CLASS_NAMES.size() * 30 + 20;
 	int xPos = 10; 
 	int cadreYPos = 10; 
 
@@ -495,7 +477,7 @@ void YOLOv8::draw_objects(
 
 	int textYPos = cadreYPos + 30; 
 
-	for (const auto& className : DISPLAYED_CLASS_NAMES) {
+	for (const auto& className : CLASS_NAMES) {
 		putText(res, className + ": " + std::to_string(classCounts_IN[className]), Point(xPos + 10, textYPos), FONT_HERSHEY_SIMPLEX, 0.6, Scalar(255, 255, 255), 2, LINE_AA);
 		textYPos += 30;
 	}
@@ -506,7 +488,7 @@ void YOLOv8::draw_objects(
 
 		textYPos = cadreYPos + 30; 
 
-		for (const auto& className : DISPLAYED_CLASS_NAMES) {
+		for (const auto& className : CLASS_NAMES) {
 			putText(res, className + ": " + std::to_string(classCounts_OUT[className]), Point(xPos + 10, textYPos), FONT_HERSHEY_SIMPLEX, 0.6, Scalar(255, 255, 255), 2, LINE_AA);
 			textYPos += 30;
 		}

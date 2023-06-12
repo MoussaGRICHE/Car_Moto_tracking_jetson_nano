@@ -47,9 +47,7 @@ list(APPEND ALL_LIBS
 include_directories(${INCLUDE_DIRS})
 
 file(GLOB My_Source_Files ${PROJECT_SOURCE_DIR}/src/*.cpp)
-add_executable(${PROJECT_NAME} ${My_Source_Files})
-
-
+add_executable(${PROJECT_NAME} main.cpp ${My_Source_Files})
 
 link_directories(${ALL_LIBS})
 target_link_libraries(${PROJECT_NAME} PRIVATE nvinfer nvinfer_plugin ${CUDA_LIBRARIES} ${OpenCV_LIBS})

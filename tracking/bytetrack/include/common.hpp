@@ -1,9 +1,9 @@
 //
-// Created by ubuntu on 3/16/23.
+// Created by ubuntu on 1/24/23.
 //
 
-#ifndef JETSON_DETECT_COMMON_HPP
-#define JETSON_DETECT_COMMON_HPP
+#ifndef DETECT_END2END_COMMON_HPP
+#define DETECT_END2END_COMMON_HPP
 #include "opencv2/opencv.hpp"
 #include <sys/stat.h>
 #include <unistd.h>
@@ -25,7 +25,48 @@ do                                                    \
     }                                                 \
 } while (0)
 
+namespace det 
+{
 
+	class Logger : public nvinfer1::ILogger
+	{
+	public:
+		nvinfer1::ILogger::Severity reportableSeverity;
+
+		explicit Logger(nvinfer1::ILogger::Severity severity = nvinfer1::ILogger::Severity::kINFO) :
+			reportableSeverity(severity)
+		{
+		}
+
+		void log(nvinfer1::ILogger::Severity severity, const char* msg) noexcept override
+		{
+			if (severity > reportableSeverity)
+			{
+				return;
+			}
+			switch (severity)
+			{
+			case nvinfer1::ILogger::Severity::kINTERNAL_ERROR:
+				std::cerr << "INTERNAL_ERROR: ";
+				break;
+			case nvinfer1::ILogger::Severity::kERROR:
+				std::cerr << "ERROR: ";
+				break;
+			case nvinfer1::ILogger::Severity::kWARNING:
+				std::cerr << "WARNING: ";
+				break;
+			case nvinfer1::ILogger::Severity::kINFO:
+				std::cerr << "INFO: ";
+				break;
+			default:
+				std::cerr << "VERBOSE: ";
+				break;
+			}
+			std::cerr << msg << std::endl;
+		}
+	};
+
+}
 
 inline int get_size_by_dims(const nvinfer1::Dims& dims)
 {
@@ -110,4 +151,4 @@ namespace det
 		float width = 0;
 	};
 }
-#endif //JETSON_DETECT_COMMON_HPP
+#endif //DETECT_END2END_COMMON_HPP
