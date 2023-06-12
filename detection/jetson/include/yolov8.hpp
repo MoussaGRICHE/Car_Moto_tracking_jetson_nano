@@ -31,6 +31,13 @@ public:
 		const std::vector<std::string>& CLASS_NAMES,
 		const std::vector<std::vector<unsigned int>>& COLORS
 	);
+	static void draw_fps(
+		const cv::Mat& image,
+		cv::Mat& res,
+		double infer_fps,
+		int infer_rate
+	);
+
 	int num_bindings;
 	int num_inputs = 0;
 	int num_outputs = 0;
@@ -421,4 +428,33 @@ void YOLOv8::draw_objects(
 		);
 	}
 }
+
+void YOLOv8::draw_fps(const cv::Mat& image, cv::Mat& res, double infer_fps, int infer_rate)
+{
+    // Draw fpsCadre (yellow box)
+    int fpsCadreWidth = 200;
+    int fpsCadreHeight = 70;
+    int fpsCadreXPos = (res.cols - fpsCadreWidth) / 2;
+    int fpsCadreYPos = 10;
+
+    rectangle(res, cv::Point(fpsCadreXPos, fpsCadreYPos), cv::Point(fpsCadreXPos + fpsCadreWidth, fpsCadreYPos + fpsCadreHeight), cv::Scalar(0, 255, 255), -1); // Draw the fpsCadre
+
+    int fontFace = cv::FONT_HERSHEY_SIMPLEX;
+    double fontScale = 0.6;
+    int thickness = 2;
+
+    std::string fpsText = "FPS: " + std::to_string(static_cast<int>(infer_fps));
+    std::string frameTraitText = "1/" + std::to_string(infer_rate) + " frame processed";
+
+    cv::Size fpsTextSize = cv::getTextSize(fpsText, fontFace, fontScale, thickness, nullptr);
+    int fpsTextX = (res.cols - fpsTextSize.width) / 2;
+    int fpsTextY = fpsCadreYPos + (fpsCadreHeight - fpsTextSize.height) / 2;
+    cv::putText(res, fpsText, cv::Point(fpsTextX, fpsTextY), fontFace, fontScale, cv::Scalar(255, 255, 255), thickness, cv::LINE_AA);
+
+    cv::Size frameTraitTextSize = cv::getTextSize(frameTraitText, fontFace, fontScale, thickness, nullptr);
+    int frameTraitTextX = (res.cols - frameTraitTextSize.width) / 2;
+    int frameTraitTextY = fpsTextY + fpsTextSize.height + 10;
+    cv::putText(res, frameTraitText, cv::Point(frameTraitTextX, frameTraitTextY), fontFace, fontScale, cv::Scalar(255, 255, 255), thickness, cv::LINE_AA);
+}
+
 #endif //JETSON_DETECT_YOLOV8_HPP
