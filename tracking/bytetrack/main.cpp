@@ -217,13 +217,19 @@ int main(int argc, char** argv) {
                 line(image, crossingLine[2], crossingLine[3], lineColor, 2);
             }
 
+            
+
+            // Draw bounding boxes, labels, tracker_id, and counting results on the image
+            yolov8->draw_objects(image, res, track_objs, CLASS_NAMES, COLORS, classCounts_IN, classCounts_OUT, count_line);
+
             auto end = chrono::system_clock::now();
             double tc = chrono::duration_cast<chrono::microseconds>(end - start).count() / 1000.0;
             double infer_fps = (1000.0 / tc) * infer_rate;
             printf("cost %2.4lf ms (%0.0lf fps, 1/ %d frame traited)\n", tc, round(infer_fps), infer_rate);
 
-            // Draw bounding boxes, labels, tracker_id, and counting results on the image
-            yolov8->draw_objects(image, res, track_objs, CLASS_NAMES, COLORS, classCounts_IN, classCounts_OUT, count_line, infer_fps);
+            // Draw the FPSon the image
+            yolov8->draw_fps(image, res, infer_fps, infer_rate);
+
 
             if (output_type == "save") {
                 writer.write(res);
