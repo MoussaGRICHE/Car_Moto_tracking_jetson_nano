@@ -1,16 +1,11 @@
 //
-// Created by ubuntu on 1/20/23.
+// Created by ubuntu on 3/16/23.
 //
 #ifndef JETSON_DETECT_YOLOV8_HPP
 #define JETSON_DETECT_YOLOV8_HPP
-
 #include "fstream"
 #include "common.hpp"
 #include "NvInferPlugin.h"
-#include "BYTETracker.h"
-#include "logging.h"
-#include "util.h"
-
 using namespace det;
 
 class YOLOv8
@@ -34,11 +29,7 @@ public:
 		cv::Mat& res,
 		const std::vector<Object>& objs,
 		const std::vector<std::string>& CLASS_NAMES,
-		const std::vector<std::vector<unsigned int>>& COLORS,
-		std::map<std::string, int>& classCounts_IN,
-		std::map<std::string, int>& classCounts_OUT,
-		int count_line,
-		double infer_fps
+		const std::vector<std::vector<unsigned int>>& COLORS
 	);
 	int num_bindings;
 	int num_inputs = 0;
@@ -54,8 +45,7 @@ private:
 	nvinfer1::IRuntime* runtime = nullptr;
 	nvinfer1::IExecutionContext* context = nullptr;
 	cudaStream_t stream = nullptr;
-	det::Logger gLogger{ nvinfer1::ILogger::Severity::kERROR };
-
+	Logger gLogger{ nvinfer1::ILogger::Severity::kERROR };
 
 };
 
@@ -367,58 +357,16 @@ void YOLOv8::postprocess(std::vector<Object>& objs)
 	}
 }
 
-bool checkIfObjsCrossedTheLine(
-    const std::vector<Object>& objs, 
-    const cv::Point* line,
-    const std::vector<std::string>& CLASS_NAMES,
-    const std::vector<std::string>& DISPLAYED_CLASS_NAMES,
-    std::map<std::string, int>& classCounts_IN, 
-    std::map<std::string, int>& classCounts_OUT, 
-    std::vector<int>& crossedTrackerIds,
-    int count_line
-) {
-    bool atLeastOneObjCrossedTheLine = false;
-
-    for (auto& obj : objs) {
-        if (std::find(DISPLAYED_CLASS_NAMES.begin(), DISPLAYED_CLASS_NAMES.end(), CLASS_NAMES[obj.label]) != DISPLAYED_CLASS_NAMES.end()) {
-            cv::Point center(obj.rect.x + obj.rect.width / 2, obj.rect.y + obj.rect.height / 2);
-
-            // Check if the object crosses the first line based on the calculated slope1
-			if (hasPassedLine(line[0], line[1], center) && std::find(crossedTrackerIds.begin(), crossedTrackerIds.end(), obj.tracker_id) == crossedTrackerIds.end()) {
-				classCounts_IN[CLASS_NAMES[obj.label]]++;
-				atLeastOneObjCrossedTheLine = true;
-				crossedTrackerIds.push_back(obj.tracker_id);
-			}
-			if (count_line == 2) {
-				// Check if the object crosses the first line based on the calculated slope1
-				if (hasPassedLine(line[2], line[3], center) && std::find(crossedTrackerIds.begin(), crossedTrackerIds.end(), obj.tracker_id) == crossedTrackerIds.end()) {
-					classCounts_OUT[CLASS_NAMES[obj.label]]++;
-					atLeastOneObjCrossedTheLine = true;
-					crossedTrackerIds.push_back(obj.tracker_id);
-				}
-			}
-		}	
-	}
-	return atLeastOneObjCrossedTheLine;
-}
-
-
 void YOLOv8::draw_objects(
-    const cv::Mat& image,
-    cv::Mat& res,
-    const std::vector<Object>& objs,
-    const std::vector<std::string>& CLASS_NAMES,
-    const std::vector<std::vector<unsigned int>>& COLORS,
-	std::map<std::string, int>& classCounts_IN, 
-	std::map<std::string, int>& classCounts_OUT,
-	int count_line,
-	double infer_fps
+	const cv::Mat& image,
+	cv::Mat& res,
+	const std::vector<Object>& objs,
+	const std::vector<std::string>& CLASS_NAMES,
+	const std::vector<std::vector<unsigned int>>& COLORS
 )
 {
-    res = image.clone();
-    int yPos = 60;
-
-    for (auto& obj : objs) 
+	res = image.clone();
+	for (auto& obj : objs)
 	{
 		cv::Scalar color = cv::Scalar(
 			COLORS[obj.label][0],
@@ -431,29 +379,37 @@ void YOLOv8::draw_objects(
 			color,
 			2
 		);
+
 		char text[256];
 		sprintf(
 			text,
-			"%s, Id: %d",
+			"%s %.1f%%",
 			CLASS_NAMES[obj.label].c_str(),
-			obj.tracker_id
+			obj.prob * 100
 		);
+
 		int baseLine = 0;
 		cv::Size label_size = cv::getTextSize(
 			text,
 			cv::FONT_HERSHEY_SIMPLEX,
-			0.4, 1,
+			0.4,
+			1,
 			&baseLine
 		);
+
 		int x = (int)obj.rect.x;
 		int y = (int)obj.rect.y + 1;
-		if (y > res.rows) y = res.rows;
+
+		if (y > res.rows)
+			y = res.rows;
+
 		cv::rectangle(
 			res,
 			cv::Rect(x, y, label_size.width, label_size.height + baseLine),
 			{ 0, 0, 255 },
 			-1
 		);
+
 		cv::putText(
 			res,
 			text,
@@ -463,53 +419,6 @@ void YOLOv8::draw_objects(
 			{ 255, 255, 255 },
 			1
 		);
-    }
-
-	// Counting results display
-	int cadreWidth = 200;
-	int cadreHeight = CLASS_NAMES.size() * 30 + 20;
-	int xPos = 10; 
-	int cadreYPos = 10; 
-
-	rectangle(res, Point(xPos, cadreYPos), Point(xPos + cadreWidth, cadreYPos + cadreHeight), Scalar(0, 0, 255), -1); // Draw the cadre
-
-	int textYPos = cadreYPos + 30; 
-
-	for (const auto& className : CLASS_NAMES) {
-		putText(res, className + ": " + std::to_string(classCounts_IN[className]), Point(xPos + 10, textYPos), FONT_HERSHEY_SIMPLEX, 0.6, Scalar(255, 255, 255), 2, LINE_AA);
-		textYPos += 30;
 	}
-
-	if (count_line == 2) {
-		xPos = res.cols - cadreWidth - 10; 
-		rectangle(res, Point(xPos, cadreYPos), Point(xPos + cadreWidth, cadreYPos + cadreHeight), Scalar(0, 255, 0), -1); // Draw the second cadre
-
-		textYPos = cadreYPos + 30; 
-
-		for (const auto& className : CLASS_NAMES) {
-			putText(res, className + ": " + std::to_string(classCounts_OUT[className]), Point(xPos + 10, textYPos), FONT_HERSHEY_SIMPLEX, 0.6, Scalar(255, 255, 255), 2, LINE_AA);
-			textYPos += 30;
-		}
-	}
-
-	// Draw infer_fps in a yellow box (cadre)
-    int fpsCadreWidth = 150;
-    int fpsCadreHeight = 50;
-    int fpsCadreXPos = (res.cols - fpsCadreWidth) / 2;
-    int fpsCadreYPos = 10;
-
-    rectangle(res, cv::Point(fpsCadreXPos, fpsCadreYPos), cv::Point(fpsCadreXPos + fpsCadreWidth, fpsCadreYPos + fpsCadreHeight), cv::Scalar(0, 255, 255), -1); // Draw the fps cadre
-
-    int fontFace = cv::FONT_HERSHEY_SIMPLEX;
-    double fontScale = 0.6;
-    int thickness = 2;
-
-    std::string fpsText = "FPS: " + std::to_string(static_cast<int>(infer_fps));
-    cv::Size textSize = cv::getTextSize(fpsText, fontFace, fontScale, thickness, nullptr);
-    int textX = (res.cols - textSize.width) / 2;
-    int textY = fpsCadreYPos + (fpsCadreHeight + textSize.height) / 2;
-    cv::putText(res, fpsText, cv::Point(textX, textY), fontFace, fontScale, cv::Scalar(255, 255, 255), thickness, cv::LINE_AA);
-
 }
-
 #endif //JETSON_DETECT_YOLOV8_HPP
